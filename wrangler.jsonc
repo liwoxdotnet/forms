@@ -1,0 +1,15 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+  
+    "name": "liwox-forms",
+  
+    "compatibility_date": "2026-07-04",
+  
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "liwox_forms_db",
+        "database_id": "147a5684-b42a-4b02-a49e-2e00961d8b50"
+      }
+    ]
+  }
