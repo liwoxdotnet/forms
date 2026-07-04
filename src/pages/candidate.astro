@@ -1,0 +1,91 @@
+---
+---
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liwox Recruitment</title>
+</head>
+
+<body>
+
+<h1>Register Your Interest</h1>
+
+<form id="leadForm">
+
+<input
+type="text"
+name="full_name"
+placeholder="Full Name"
+required
+/>
+
+<br><br>
+
+<input
+type="email"
+name="email"
+placeholder="Email"
+required
+/>
+
+<br><br>
+
+<input
+type="text"
+name="phone"
+placeholder="Phone"
+required
+/>
+
+<br><br>
+
+<button type="submit">
+Submit
+</button>
+
+</form>
+
+<p id="status"></p>
+
+<script>
+
+const form=document.getElementById("leadForm");
+
+form.addEventListener("submit",async(e)=>{
+
+e.preventDefault();
+
+const data={
+full_name:form.full_name.value,
+email:form.email.value,
+phone:form.phone.value,
+source:"Candidate Landing Page"
+};
+
+const response=await fetch("http://127.0.0.1:8787/api/leads",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(data)
+
+});
+
+const result=await response.json();
+
+document.getElementById("status").innerText=result.message;
+
+form.reset();
+
+});
+
+</script>
+
+</body>
+
+</html>
