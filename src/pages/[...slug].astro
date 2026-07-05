@@ -1,5 +1,8 @@
 ---
-const { slug } = Astro.params;
+export const prerender = false;
+
+const slugParam = Astro.params.slug;
+const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam;
 ---
 
 <!DOCTYPE html>
