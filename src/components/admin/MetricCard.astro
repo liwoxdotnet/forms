@@ -1,0 +1,48 @@
+---
+const {
+  label = "Metric",
+  value = "0",
+  change = "",
+  tone = "blue"
+} = Astro.props;
+---
+
+<div class={`metric-card tone-${tone}`}>
+  <p>{label}</p>
+  <strong>{value}</strong>
+  {change && <span>{change}</span>}
+</div>
+
+<style>
+  .metric-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 900;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 2rem;
+    letter-spacing: -.04em;
+  }
+
+  span {
+    display: inline-flex;
+    margin-top: 8px;
+    font-size: .85rem;
+    font-weight: 800;
+    color: var(--green);
+  }
+</style>

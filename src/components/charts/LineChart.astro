@@ -1,0 +1,14 @@
+---
+const { title = "Line Chart" } = Astro.props;
+---
+
+<div class="chart-card">
+  <h3>{title}</h3>
+  <div class="chart-placeholder">Line Chart Placeholder</div>
+</div>
+
+<style>
+  .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  h3 { margin: 0 0 12px; }
+  .chart-placeholder { min-height: 220px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(135deg, #eff6ff, #dbeafe); color: var(--blue); font-weight: 900; }
+</style>

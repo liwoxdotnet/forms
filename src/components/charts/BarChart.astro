@@ -1,0 +1,21 @@
+---
+const { title = "Bar Chart" } = Astro.props;
+---
+
+<div class="chart-card">
+  <h3>{title}</h3>
+  <div class="bars">
+    <span style="height:45%"></span>
+    <span style="height:70%"></span>
+    <span style="height:35%"></span>
+    <span style="height:90%"></span>
+    <span style="height:60%"></span>
+  </div>
+</div>
+
+<style>
+  .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  h3 { margin: 0 0 12px; }
+  .bars { min-height: 220px; display: flex; align-items: end; gap: 12px; padding: 20px; background: #f8fafc; border-radius: 14px; }
+  span { flex: 1; background: var(--blue); border-radius: 10px 10px 0 0; }
+</style>

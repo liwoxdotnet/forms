@@ -1,0 +1,14 @@
+---
+const { title = "Pie Chart" } = Astro.props;
+---
+
+<div class="chart-card">
+  <h3>{title}</h3>
+  <div class="pie-placeholder">Pie Chart</div>
+</div>
+
+<style>
+  .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  h3 { margin: 0 0 12px; }
+  .pie-placeholder { width: 180px; height: 180px; margin: 18px auto; border-radius: 50%; background: conic-gradient(var(--blue) 0 45%, var(--green) 45% 75%, #dbeafe 75% 100%); display: grid; place-items: center; color: #fff; font-weight: 900; }
+</style>

@@ -1,0 +1,20 @@
+---
+const { title = "Funnel Chart" } = Astro.props;
+---
+
+<div class="chart-card">
+  <h3>{title}</h3>
+  <div class="funnel">
+    <div style="width:100%">Visitors</div>
+    <div style="width:78%">Leads</div>
+    <div style="width:48%">Qualified</div>
+    <div style="width:24%">Converted</div>
+  </div>
+</div>
+
+<style>
+  .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  h3 { margin: 0 0 12px; }
+  .funnel { display: grid; gap: 10px; justify-items: center; padding: 20px; background: #f8fafc; border-radius: 14px; }
+  .funnel div { background: var(--blue); color: #fff; padding: 12px; border-radius: 10px; text-align: center; font-weight: 900; }
+</style>

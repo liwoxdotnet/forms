@@ -1,0 +1,29 @@
+---
+const { columns = 2 } = Astro.props;
+---
+
+<div class={`dashboard-grid cols-${columns}`}>
+  <slot />
+</div>
+
+<style>
+  .dashboard-grid {
+    display: grid;
+    gap: 18px;
+    align-items: start;
+  }
+
+  .cols-2 {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  .cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 980px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+const { forms = [] } = Astro.props;
+import StatusBadge from "../admin/StatusBadge.astro";
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Key</th>
+        <th>Type</th>
+        <th>Campaign</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {forms.length ? forms.map((form) => (
+        <tr>
+          <td><strong>{form.name}</strong></td>
+          <td>{form.form_key}</td>
+          <td>{form.form_type}</td>
+          <td>{form.campaign_name || "—"}</td>
+          <td><StatusBadge status={form.status || "active"} /></td>
+        </tr>
+      )) : (
+        <tr>
+          <td colspan="5" class="empty">No forms found</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; min-width: 620px; border-collapse: collapse; }
+  th, td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: .92rem; }
+  th { background: #f9fafb; color: #374151; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  .empty { text-align: center; color: var(--muted); padding: 24px; }
+</style>

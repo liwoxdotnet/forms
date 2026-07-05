@@ -1,0 +1,62 @@
+---
+const {
+  actions = [
+    { label: "View", href: "#" },
+    { label: "Edit", href: "#" }
+  ]
+} = Astro.props;
+---
+
+<div class="action-menu">
+  <button type="button">Actions ▾</button>
+  <div class="menu">
+    {actions.map((action) => (
+      <a href={action.href}>{action.label}</a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .action-menu {
+    position: relative;
+    display: inline-block;
+  }
+
+  button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 150px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: none;
+    overflow: hidden;
+    z-index: 20;
+  }
+
+  .action-menu:hover .menu {
+    display: grid;
+  }
+
+  a {
+    padding: 10px 12px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  a:hover {
+    background: #f3f4f6;
+  }
+</style>

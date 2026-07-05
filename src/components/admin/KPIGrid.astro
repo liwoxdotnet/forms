@@ -1,0 +1,38 @@
+---
+const {
+  items = [
+    { label: "Total Leads", value: "0" },
+    { label: "Today", value: "0" },
+    { label: "New", value: "0" },
+    { label: "Campaigns", value: "0" }
+  ]
+} = Astro.props;
+
+import MetricCard from "./MetricCard.astro";
+---
+
+<section class="kpi-grid">
+  {items.map((item) => (
+    <MetricCard label={item.label} value={item.value} change={item.change || ""} />
+  ))}
+</section>
+
+<style>
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 980px) {
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .kpi-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+const {
+  items = [
+    { title: "Lead created", description: "A new lead was captured.", time: "Just now" },
+    { title: "Campaign updated", description: "Campaign details changed.", time: "Earlier" }
+  ]
+} = Astro.props;
+---
+
+<div class="activity-feed">
+  {items.map((item) => (
+    <article class="activity">
+      <div class="dot"></div>
+      <div>
+        <h3>{item.title}</h3>
+        <p>{item.description}</p>
+        <span>{item.time}</span>
+      </div>
+    </article>
+  ))}
+</div>
+
+<style>
+  .activity-feed {
+    display: grid;
+    gap: 14px;
+  }
+
+  .activity {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 12px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--blue);
+    margin-top: 6px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: .98rem;
+  }
+
+  p {
+    margin: 4px 0;
+    color: var(--muted);
+  }
+
+  span {
+    color: #9ca3af;
+    font-size: .82rem;
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+const { pages = [] } = Astro.props;
+import StatusBadge from "../admin/StatusBadge.astro";
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Slug</th>
+        <th>Campaign</th>
+        <th>Status</th>
+        <th>Leads</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {pages.length ? pages.map((page) => (
+        <tr>
+          <td><strong>{page.title}</strong></td>
+          <td>{page.slug}</td>
+          <td>{page.campaign_name || "—"}</td>
+          <td><StatusBadge status={page.status || "published"} /></td>
+          <td>{page.lead_count ?? 0}</td>
+        </tr>
+      )) : (
+        <tr>
+          <td colspan="5" class="empty">No pages found</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; min-width: 620px; border-collapse: collapse; }
+  th, td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: .92rem; }
+  th { background: #f9fafb; color: #374151; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  .empty { text-align: center; color: var(--muted); padding: 24px; }
+</style>

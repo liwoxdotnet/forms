@@ -1,0 +1,41 @@
+---
+const { status = "new" } = Astro.props;
+const normalized = String(status || "new").toLowerCase();
+---
+
+<span class={`status status-${normalized}`}>
+  {status}
+</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 900;
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .status-new {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status-contacted {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .status-qualified {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-archived,
+  .status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+</style>

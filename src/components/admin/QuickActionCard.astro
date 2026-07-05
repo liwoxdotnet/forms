@@ -1,0 +1,43 @@
+---
+const {
+  title = "Quick Action",
+  description = "Create or manage something quickly.",
+  href = "#",
+  buttonText = "Open"
+} = Astro.props;
+---
+
+<article class="quick-card">
+  <h3>{title}</h3>
+  <p>{description}</p>
+  <a href={href}>{buttonText}</a>
+</article>
+
+<style>
+  .quick-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  h3 {
+    margin: 0 0 8px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    color: var(--muted);
+  }
+
+  a {
+    display: inline-flex;
+    background: var(--blue);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 900;
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+const { campaigns = [] } = Astro.props;
+import StatusBadge from "../admin/StatusBadge.astro";
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Key</th>
+        <th>Status</th>
+        <th>Leads</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {campaigns.length ? campaigns.map((campaign) => (
+        <tr>
+          <td><strong>{campaign.name}</strong></td>
+          <td>{campaign.campaign_key}</td>
+          <td><StatusBadge status={campaign.status || "active"} /></td>
+          <td>{campaign.lead_count ?? 0}</td>
+          <td>{campaign.created_at}</td>
+        </tr>
+      )) : (
+        <tr>
+          <td colspan="5" class="empty">No campaigns found</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; min-width: 620px; border-collapse: collapse; }
+  th, td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: .92rem; }
+  th { background: #f9fafb; color: #374151; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  .empty { text-align: center; color: var(--muted); padding: 24px; }
+</style>
