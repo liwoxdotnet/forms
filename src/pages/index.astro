@@ -1,160 +1,245 @@
 ---
-const forms = [
-  {
-    title: "Warehouse Jobs",
-    url: "/warehouse-jobs",
-    description: "Candidate registration form"
-  }
-];
 ---
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" href="/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
   <title>Liwox Forms</title>
 
   <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Inter,Arial,sans-serif;
+    :root {
+      --bg: #020617;
+      --text: #ffffff;
+      --muted: #cbd5e1;
+      --blue: #3b82f6;
+      --cyan: #22d3ee;
+      --violet: #8b5cf6;
     }
 
-    body{
-      background:#f5f7fb;
-      color:#1f2937;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    header{
-      background:#0f172a;
-      color:white;
-      padding:22px 40px;
-      box-shadow:0 2px 10px rgba(0,0,0,.1);
+    body {
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
     }
 
-    h1{
-      font-size:34px;
+    .page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      position: relative;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,.28), transparent 30%),
+        radial-gradient(circle at 80% 25%, rgba(139,92,246,.25), transparent 32%),
+        radial-gradient(circle at 50% 90%, rgba(34,211,238,.16), transparent 34%),
+        linear-gradient(135deg, #020617, #07111f 55%, #020617);
     }
 
-    p{
-      color:#64748b;
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 72%);
+      animation: drift 20s linear infinite;
     }
 
-    .container{
-      max-width:1100px;
-      margin:auto;
-      padding:50px 30px;
+    .orb {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      border-radius: 999px;
+      filter: blur(78px);
+      opacity: .42;
+      animation: float 8s ease-in-out infinite;
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-      gap:24px;
-      margin-top:30px;
+    .orb.one {
+      background: var(--blue);
+      top: 10%;
+      left: 10%;
     }
 
-    .card{
-      background:white;
-      border-radius:14px;
-      padding:28px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    .orb.two {
+      background: var(--violet);
+      right: 8%;
+      bottom: 10%;
+      animation-delay: -3s;
     }
 
-    .card h2{
-      margin-bottom:12px;
-      font-size:22px;
+    .glow {
+      position: fixed;
+      width: 360px;
+      height: 360px;
+      border-radius: 999px;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(34,211,238,.16), transparent 65%);
+      transform: translate(-50%, -50%);
+      left: 50%;
+      top: 50%;
+      z-index: 1;
     }
 
-    .card p{
-      margin-bottom:20px;
-      line-height:1.6;
+    .hero {
+      position: relative;
+      z-index: 2;
+      width: min(420px, 92vw);
+      text-align: center;
+      padding: 34px 26px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 26px;
+      background: rgba(255,255,255,.055);
+      box-shadow: 0 32px 100px rgba(0,0,0,.36);
+      backdrop-filter: blur(20px);
+      animation: reveal .9s ease both, softFloat 5.5s ease-in-out infinite;
     }
 
-    .btn{
-      display:inline-block;
-      text-decoration:none;
-      padding:12px 20px;
-      border-radius:8px;
-      font-weight:600;
-      transition:.2s;
+    .badge {
+      display: inline-flex;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: #bfdbfe;
+      background: rgba(59,130,246,.14);
+      border: 1px solid rgba(147,197,253,.22);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
     }
 
-    .primary{
-      background:#2563eb;
-      color:white;
+    h1 {
+      font-size: clamp(46px, 9vw, 74px);
+      line-height: .88;
+      letter-spacing: -.075em;
+      margin-bottom: 18px;
+      text-shadow: 0 18px 50px rgba(0,0,0,.35);
     }
 
-    .primary:hover{
-      background:#1d4ed8;
+    .subtitle {
+      color: var(--muted);
+      font-size: 15.5px;
+      line-height: 1.55;
+      max-width: 330px;
+      margin: 0 auto 28px;
     }
 
-    .secondary{
-      background:#111827;
-      color:white;
+    .start {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 148px;
+      min-height: 54px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .17em;
+      box-shadow: 0 18px 60px rgba(37,99,235,.45);
+      transition: transform .25s ease, box-shadow .25s ease;
     }
 
-    .secondary:hover{
-      background:black;
+    .start:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 24px 80px rgba(34,211,238,.5);
     }
 
-    footer{
-      text-align:center;
-      padding:40px;
-      color:#94a3b8;
+    .footer {
+      position: absolute;
+      bottom: 22px;
+      z-index: 2;
+      color: rgba(255,255,255,.45);
+      font-size: 12px;
+      letter-spacing: .12em;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-22px) scale(1.08); }
+    }
+
+    @keyframes softFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(42px); }
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        overflow: auto;
+      }
+
+      .hero {
+        width: min(360px, 92vw);
+        padding: 30px 22px;
+      }
+
+      h1 {
+        letter-spacing: -.06em;
+      }
     }
   </style>
 </head>
 
 <body>
+  <main class="page">
+    <div class="grid"></div>
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="glow" id="glow"></div>
 
-<header>
-    <h1>Liwox Forms</h1>
-</header>
+    <section class="hero">
+      <div class="badge">Lead Capture Infrastructure</div>
 
-<div class="container">
+      <h1>LIWOX<br />FORMS</h1>
 
-    <p>
-        Central platform for all Liwox landing pages, candidate registrations,
-        lead capture forms and campaign management.
-    </p>
+      <p class="subtitle">
+        Elegant lead capture pages for focused Liwox campaigns.
+      </p>
 
-    <div class="grid">
+      <a class="start" href="/admin">START</a>
+    </section>
 
-        <div class="card">
-            <h2>Admin Dashboard</h2>
-            <p>
-                Manage campaigns, forms and leads from one place.
-            </p>
+    <div class="footer">POWERED BY LIWOX GROUP</div>
+  </main>
 
-            <a class="btn secondary" href="/admin">
-                Open Dashboard →
-            </a>
-        </div>
+  <script>
+    const glow = document.getElementById("glow");
 
-        {
-          forms.map(form => (
-            <div class="card">
-              <h2>{form.title}</h2>
-              <p>{form.description}</p>
-
-              <a class="btn primary" href={form.url}>
-                Open Form →
-              </a>
-            </div>
-          ))
-        }
-
-    </div>
-
-</div>
-
-<footer>
-    © {new Date().getFullYear()} Liwox Forms
-</footer>
-
+    window.addEventListener("pointermove", (event) => {
+      glow.style.left = `${event.clientX}px`;
+      glow.style.top = `${event.clientY}px`;
+    });
+  </script>
 </body>
 </html>
