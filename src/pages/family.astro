@@ -39,7 +39,7 @@ const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
     }
 
     .left {
-      padding: clamp(34px, 2vw, 1px);
+      padding: clamp(34px, 6vw, 80px);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -102,36 +102,21 @@ const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
 
     .product {
       width: min(420px, 90%);
-      border-radius: 24px;
-      padding: 24px;
-      background: rgba(255,255,255,.09);
-      border: 1px solid rgba(255,255,255,.16);
-      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+      border-radius: 26px;
+      padding: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 30px 90px rgba(0,0,0,.32);
       transform: rotate(-2deg);
+      animation: floatProduct 5s ease-in-out infinite;
     }
 
-    .book {
-      height: 210px;
-      border-radius: 18px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.05)),
-        linear-gradient(135deg, #2563eb, #22d3ee);
-      padding: 26px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .book small {
-      font-weight: 800;
-      letter-spacing: .14em;
-      color: #e0f2fe;
-    }
-
-    .book strong {
-      font-size: 36px;
-      line-height: 1;
-      letter-spacing: -0.04em;
+    .product-image {
+      width: 100%;
+      display: block;
+      border-radius: 20px;
+      object-fit: cover;
+      box-shadow: 0 24px 60px rgba(0,0,0,.34);
     }
 
     .right {
@@ -154,6 +139,15 @@ const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
       border: 1px solid #e5e7eb !important;
     }
 
+    @keyframes floatProduct {
+      0%, 100% {
+        transform: rotate(-2deg) translateY(0);
+      }
+      50% {
+        transform: rotate(-2deg) translateY(-10px);
+      }
+    }
+
     @media (max-width: 900px) {
       body {
         overflow: auto;
@@ -165,6 +159,10 @@ const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
 
       .right {
         min-height: auto;
+      }
+
+      .product {
+        width: min(360px, 100%);
       }
     }
   </style>
@@ -181,13 +179,19 @@ const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
         Get a practical family resource designed to help you take the next step with clarity and confidence.
       </p>
 
+      <ul class="benefits">
+        <li><span class="tick">✓</span> Practical guidance in a simple format.</li>
+        <li><span class="tick">✓</span> Helpful updates when new resources are available.</li>
+        <li><span class="tick">✓</span> A quick way to stay connected.</li>
+      </ul>
+
       <div class="product">
         <img
-            src="/images/family-guide.png"
-            alt="Family Guide"
-            class="product-image"
+          src="/images/family-guide.png"
+          alt="Family Support Guide"
+          class="product-image"
         />
-    </div>
+      </div>
     </section>
 
     <section class="right">
