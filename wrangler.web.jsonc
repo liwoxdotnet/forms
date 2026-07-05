@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "liwox-forms-web",
+  "main": "dist/server/entry.mjs",
+  "compatibility_date": "2025-12-01",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "dist/client"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "liwox_forms_db",
+      "database_id": "147a5684-b42a-4b02-a49e-2e00961d8b50"
+    }
+  ]
+}
