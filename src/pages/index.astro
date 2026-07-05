@@ -1,17 +1,160 @@
 ---
-
+const forms = [
+  {
+    title: "Warehouse Jobs",
+    url: "/warehouse-jobs",
+    description: "Candidate registration form"
+  }
+];
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>LIWOX FORMS</h1>
-	</body>
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content={Astro.generator} />
+  <title>Liwox Forms</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Inter,Arial,sans-serif;
+    }
+
+    body{
+      background:#f5f7fb;
+      color:#1f2937;
+    }
+
+    header{
+      background:#0f172a;
+      color:white;
+      padding:22px 40px;
+      box-shadow:0 2px 10px rgba(0,0,0,.1);
+    }
+
+    h1{
+      font-size:34px;
+    }
+
+    p{
+      color:#64748b;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      padding:50px 30px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:24px;
+      margin-top:30px;
+    }
+
+    .card{
+      background:white;
+      border-radius:14px;
+      padding:28px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .card h2{
+      margin-bottom:12px;
+      font-size:22px;
+    }
+
+    .card p{
+      margin-bottom:20px;
+      line-height:1.6;
+    }
+
+    .btn{
+      display:inline-block;
+      text-decoration:none;
+      padding:12px 20px;
+      border-radius:8px;
+      font-weight:600;
+      transition:.2s;
+    }
+
+    .primary{
+      background:#2563eb;
+      color:white;
+    }
+
+    .primary:hover{
+      background:#1d4ed8;
+    }
+
+    .secondary{
+      background:#111827;
+      color:white;
+    }
+
+    .secondary:hover{
+      background:black;
+    }
+
+    footer{
+      text-align:center;
+      padding:40px;
+      color:#94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Liwox Forms</h1>
+</header>
+
+<div class="container">
+
+    <p>
+        Central platform for all Liwox landing pages, candidate registrations,
+        lead capture forms and campaign management.
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+            <h2>Admin Dashboard</h2>
+            <p>
+                Manage campaigns, forms and leads from one place.
+            </p>
+
+            <a class="btn secondary" href="/admin">
+                Open Dashboard →
+            </a>
+        </div>
+
+        {
+          forms.map(form => (
+            <div class="card">
+              <h2>{form.title}</h2>
+              <p>{form.description}</p>
+
+              <a class="btn primary" href={form.url}>
+                Open Form →
+              </a>
+            </div>
+          ))
+        }
+
+    </div>
+
+</div>
+
+<footer>
+    © {new Date().getFullYear()} Liwox Forms
+</footer>
+
+</body>
 </html>
