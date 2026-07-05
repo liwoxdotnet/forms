@@ -1,0 +1,43 @@
+---
+export const prerender = false;
+
+import LandingLayout from "../components/layouts/LandingLayout.astro";
+import Hero from "../components/landing/Hero.astro";
+import LeadForm from "../components/forms/LeadForm.astro";
+
+const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+
+const pageConfig = {
+  slug: "family",
+  page_key: "family",
+  title: "Family Support Guide",
+  description: "Get practical updates, resources and support designed for families.",
+  campaign_key: "family",
+  campaign_name: "Family Campaign",
+  form_key: "family-lead-form",
+  form_name: "Family Support Form"
+};
+---
+
+<LandingLayout title={pageConfig.title}>
+  <Hero
+    eyebrow="Liwox Family Resource"
+    title="Simple support for family life"
+    description="Complete the short form to receive helpful resources, updates and next-step guidance for your family."
+    benefits={[
+      "Access useful family-focused resources.",
+      "Receive updates relevant to your situation.",
+      "Take the next step with clear guidance."
+    ]}
+  />
+
+  <LeadForm
+    title="Get the Family Guide"
+    description="Enter your details below."
+    apiBase={API_BASE}
+    campaignKey={pageConfig.campaign_key}
+    pageKey={pageConfig.page_key}
+    formKey={pageConfig.form_key}
+    source="family"
+  />
+</LandingLayout>
