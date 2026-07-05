@@ -1,0 +1,99 @@
+---
+const {
+  badge = "Liwox Campaign",
+  title = "Register Your Interest",
+  description = "Complete the short form and our team will contact you with the next step.",
+  benefits = [
+    "Submit your details in less than one minute.",
+    "Your enquiry goes directly into the Liwox lead dashboard.",
+    "Our team can follow up quickly based on your campaign source."
+  ]
+} = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">{badge}</div>
+
+    <h1>{title}</h1>
+
+    <p class="lead">{description}</p>
+
+    <div class="benefits">
+      {benefits.map((benefit) => (
+        <div class="benefit">
+          <span class="check">✓</span>
+          <span>{benefit}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    background:
+      radial-gradient(circle at top right, rgba(37, 99, 235, 0.35), transparent 35%),
+      linear-gradient(135deg, #06142f, #0b1d42);
+    color: #fff;
+    padding: clamp(32px, 6vw, 80px);
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-inner {
+    max-width: 780px;
+  }
+
+  .badge {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    color: #bfdbfe;
+    font-size: 0.85rem;
+    font-weight: 800;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.06em;
+  }
+
+  .lead {
+    margin: 0 0 28px;
+    font-size: clamp(1.05rem, 2.8vw, 1.45rem);
+    color: #dbeafe;
+    max-width: 700px;
+  }
+
+  .benefits {
+    display: grid;
+    gap: 14px;
+    margin-top: 28px;
+    max-width: 660px;
+  }
+
+  .benefit {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 1rem;
+    color: #e5efff;
+  }
+
+  .check {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #60a5fa;
+    color: #06142f;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    font-weight: 1000;
+  }
+</style>

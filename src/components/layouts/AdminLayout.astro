@@ -1,0 +1,112 @@
+---
+import "../../styles/global.css";
+
+const {
+  title = "Liwox Forms Admin",
+  active = "dashboard"
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <h1>Liwox Forms</h1>
+          <p>Admin Dashboard</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="/admin" class={active === "dashboard" ? "active" : ""}>Dashboard</a>
+        <a href="/candidate" class={active === "candidate" ? "active" : ""}>Candidate Page</a>
+        <a href="http://127.0.0.1:8787/api/leads" target="_blank">API Leads</a>
+        <a href="http://127.0.0.1:8787/api/campaigns" target="_blank">API Campaigns</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <slot />
+    </main>
+  </div>
+</body>
+</html>
+
+<style>
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+
+  .sidebar {
+    background: var(--navy);
+    color: #fff;
+    padding: 24px 20px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  }
+
+  .brand h1 {
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .brand p {
+    margin: 4px 0 0;
+    color: #cbd5e1;
+    font-size: 0.8rem;
+  }
+
+  .nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .nav a {
+    color: #dbeafe;
+    text-decoration: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .nav a.active,
+  .nav a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  .main {
+    padding: 28px;
+  }
+
+  @media (max-width: 980px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,177 @@
+---
+const {
+  title = "Apply Now",
+  description = "Enter your details below.",
+  apiBase = "http://127.0.0.1:8787",
+  campaignKey = "",
+  pageKey = "",
+  formKey = "",
+  source = "landing-page"
+} = Astro.props;
+---
+
+<section class="form-panel">
+  <div class="form-card lx-card">
+    <h2>{title}</h2>
+    <p>{description}</p>
+
+    <form id="leadForm">
+      <input class="lx-field" name="full_name" placeholder="Full Name" required />
+      <input class="lx-field" type="email" name="email" placeholder="Email Address" required />
+      <input class="lx-field" name="phone" placeholder="Phone Number" />
+      <input class="lx-field" name="company" placeholder="Company / Organisation (optional)" />
+      <textarea class="lx-field textarea" name="message" placeholder="Message or notes (optional)"></textarea>
+
+      <button id="submitBtn" class="lx-button" type="submit">Submit</button>
+
+      <div id="statusMessage" class="message"></div>
+    </form>
+
+    <div class="meta">Powered by Liwox Forms</div>
+  </div>
+</section>
+
+<script define:vars={{ apiBase, campaignKey, pageKey, formKey, source }}>
+  const leadForm = document.getElementById("leadForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const statusMessage = document.getElementById("statusMessage");
+
+  function showMessage(text, type) {
+    statusMessage.className = `message ${type}`;
+    statusMessage.textContent = text;
+  }
+
+  function getUtmParams() {
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+      utm_source: params.get("utm_source"),
+      utm_medium: params.get("utm_medium"),
+      utm_campaign: params.get("utm_campaign"),
+      utm_term: params.get("utm_term"),
+      utm_content: params.get("utm_content")
+    };
+  }
+
+  leadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+    statusMessage.className = "message";
+    statusMessage.textContent = "";
+
+    const formData = new FormData(leadForm);
+    const utm = getUtmParams();
+
+    const payload = {
+      campaign_key: campaignKey,
+      page_key: pageKey,
+      form_key: formKey,
+      full_name: formData.get("full_name"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      company: formData.get("company"),
+      message: formData.get("message"),
+      source,
+      referrer: document.referrer,
+      ...utm
+    };
+
+    try {
+      const response = await fetch(`${apiBase}/api/leads`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "Submission failed");
+      }
+
+      leadForm.reset();
+      showMessage("Thank you. Your details have been submitted successfully.", "ok");
+    } catch (error) {
+      showMessage(error.message || "Something went wrong. Please try again.", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    }
+  });
+</script>
+
+<style>
+  .form-panel {
+    background: #fff;
+    padding: clamp(24px, 4vw, 48px);
+    display: flex;
+    align-items: center;
+  }
+
+  .form-card {
+    width: 100%;
+    padding: 28px;
+  }
+
+  .form-card h2 {
+    margin: 0 0 8px;
+    font-size: 1.75rem;
+    letter-spacing: -0.04em;
+  }
+
+  .form-card p {
+    margin: 0 0 22px;
+    color: var(--muted);
+  }
+
+  .textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  #leadForm {
+    display: grid;
+    gap: 12px;
+  }
+
+  #submitBtn {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  #submitBtn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .message {
+    display: none;
+    margin-top: 2px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  .message.ok {
+    display: block;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .message.error {
+    display: block;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .meta {
+    margin-top: 18px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
