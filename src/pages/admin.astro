@@ -1,423 +1,178 @@
 ---
+import AdminLayout from "../components/layouts/AdminLayout.astro";
+import PageHeader from "../components/admin/PageHeader.astro";
+import DashboardGrid from "../components/admin/DashboardGrid.astro";
+import DashboardSection from "../components/admin/DashboardSection.astro";
+import Toast from "../components/shared/Toast.astro";
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Liwox Forms Admin</title>
+<AdminLayout title="Liwox Forms Admin" active="dashboard">
+  <Toast />
 
-  <style>
-    :root {
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --navy: #06142f;
-      --blue: #2563eb;
-      --green: #16a34a;
-      --radius: 16px;
-      --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+  <PageHeader
+    title="Dashboard"
+    description="View leads, campaigns, pages, and forms from Liwox landing pages."
+  />
 
-    * { box-sizing: border-box; }
+  <section class="kpi-grid">
+    <div class="metric-card">
+      <p>Total Leads</p>
+      <strong id="totalLeads">0</strong>
+    </div>
 
-    body {
-      margin: 0;
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-    }
+    <div class="metric-card">
+      <p>Today's Leads</p>
+      <strong id="todaysLeads">0</strong>
+    </div>
 
-    .layout {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-    }
+    <div class="metric-card">
+      <p>New Leads</p>
+      <strong id="newLeads">0</strong>
+    </div>
 
-    .sidebar {
-      background: var(--navy);
-      color: #fff;
-      padding: 24px 20px;
-    }
+    <div class="metric-card">
+      <p>Campaigns</p>
+      <strong id="campaignCount">0</strong>
+    </div>
+  </section>
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 36px;
-    }
+  <div class="toolbar">
+    <div class="search-box">
+      <span>⌕</span>
+      <input id="searchInput" type="search" placeholder="Search leads by name, email, phone, campaign..." />
+    </div>
 
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    }
+    <select id="statusFilter">
+      <option value="all">All statuses</option>
+      <option value="new">New</option>
+      <option value="contacted">Contacted</option>
+      <option value="qualified">Qualified</option>
+      <option value="archived">Archived</option>
+    </select>
 
-    .brand h1 {
-      font-size: 1.1rem;
-      margin: 0;
-      line-height: 1.1;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      color: #cbd5e1;
-      font-size: 0.8rem;
-    }
-
-    .nav {
-      display: grid;
-      gap: 8px;
-    }
-
-    .nav a {
-      color: #dbeafe;
-      text-decoration: none;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .nav a.active,
-    .nav a:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-
-    .main { padding: 28px; }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
-
-    .topbar h2 {
-      margin: 0;
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      letter-spacing: -0.04em;
-    }
-
-    .topbar p {
-      margin: 8px 0 0;
-      color: var(--muted);
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    button,
-    .button {
-      border: 0;
-      background: var(--blue);
-      color: #fff;
-      font-weight: 800;
-      padding: 12px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-    }
-
-    button.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    button.green { background: var(--green); }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 0.88rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 900;
-      margin-top: 8px;
-      letter-spacing: -0.04em;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 1.25rem;
-    }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 820px;
-    }
-
-    th, td {
-      padding: 13px 12px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      font-size: 0.92rem;
-      vertical-align: top;
-    }
-
-    th {
-      color: #374151;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: #f9fafb;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #e0f2fe;
-      color: #075985;
-      font-weight: 800;
-      font-size: 0.78rem;
-    }
-
-    .pill.new {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .pill.empty {
-      background: #f3f4f6;
-      color: #6b7280;
-    }
-
-    .field {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      font: inherit;
-      background: #fff;
-    }
-
-    textarea.field {
-      min-height: 92px;
-      resize: vertical;
-    }
-
-    .form {
-      display: grid;
-      gap: 12px;
-    }
-
-    .message {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      display: none;
-      font-weight: 700;
-    }
-
-    .message.ok {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .message.error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .empty-state {
-      color: var(--muted);
-      padding: 20px;
-      text-align: center;
-    }
-
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
-      .cards, .grid { grid-template-columns: 1fr; }
-      .topbar { flex-direction: column; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark"></div>
-        <div>
-          <h1>Liwox Forms</h1>
-          <p>Admin Dashboard</p>
-        </div>
-      </div>
-
-      <nav class="nav">
-        <a href="/admin" class="active">Dashboard</a>
-        <a href="/candidate">Candidate Page</a>
-        <a href="http://127.0.0.1:8787/api/leads" target="_blank">API Leads</a>
-        <a href="http://127.0.0.1:8787/api/campaigns" target="_blank">API Campaigns</a>
-      </nav>
-    </aside>
-
-    <main class="main">
-      <div class="topbar">
-        <div>
-          <h2>Dashboard</h2>
-          <p>View leads, campaigns, and form activity from Liwox landing pages.</p>
-        </div>
-
-        <div class="actions">
-          <button id="refreshBtn">Refresh</button>
-          <button id="exportBtn" class="secondary">Export CSV</button>
-        </div>
-      </div>
-
-      <section class="cards">
-        <div class="card">
-          <div class="stat-label">Total Leads</div>
-          <div class="stat-value" id="totalLeads">0</div>
-        </div>
-
-        <div class="card">
-          <div class="stat-label">Today's Leads</div>
-          <div class="stat-value" id="todaysLeads">0</div>
-        </div>
-
-        <div class="card">
-          <div class="stat-label">New Leads</div>
-          <div class="stat-value" id="newLeads">0</div>
-        </div>
-
-        <div class="card">
-          <div class="stat-label">Campaigns</div>
-          <div class="stat-value" id="campaignCount">0</div>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="card">
-          <h3 class="section-title">Recent Leads</h3>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Campaign</th>
-                  <th>Source</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody id="leadsTable">
-                <tr>
-                  <td colspan="8" class="empty-state">Loading leads...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div>
-          <div class="card" style="margin-bottom: 18px;">
-            <h3 class="section-title">Create Campaign</h3>
-
-            <form id="campaignForm" class="form">
-              <input class="field" name="name" placeholder="Campaign Name" required />
-              <input class="field" name="campaign_key" placeholder="campaign-key" required />
-              <textarea class="field" name="description" placeholder="Description"></textarea>
-              <button class="green" type="submit">Create Campaign</button>
-            </form>
-
-            <div id="campaignMessage" class="message"></div>
-          </div>
-
-          <div class="card">
-            <h3 class="section-title">Campaigns</h3>
-
-            <div class="table-wrap">
-              <table style="min-width: 420px;">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Key</th>
-                    <th>Leads</th>
-                  </tr>
-                </thead>
-                <tbody id="campaignsTable">
-                  <tr>
-                    <td colspan="3" class="empty-state">Loading campaigns...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+    <button id="refreshBtn" type="button">Refresh</button>
+    <button id="exportBtn" type="button" class="secondary">Export CSV</button>
   </div>
+
+  <DashboardGrid columns={2}>
+    <DashboardSection title="Recent Leads" description="Latest leads captured from all landing pages.">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Campaign</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+
+          <tbody id="leadsTable">
+            <tr>
+              <td colspan="8" class="empty">Loading leads...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DashboardSection>
+
+    <div class="side-stack">
+      <DashboardSection title="Create Campaign" description="Create a campaign for tracking landing page leads.">
+        <form id="campaignForm" class="form-grid">
+          <input class="field" name="name" placeholder="Campaign Name" required />
+          <input class="field" name="campaign_key" placeholder="campaign-key" required />
+          <textarea class="field" name="description" placeholder="Description"></textarea>
+          <button type="submit">Create Campaign</button>
+        </form>
+      </DashboardSection>
+
+      <DashboardSection title="Create Landing Page" description="Create a page record that dynamic routes can load.">
+        <form id="pageForm" class="form-grid">
+          <input class="field" name="title" placeholder="Page Title" required />
+          <input class="field" name="slug" placeholder="page-slug" required />
+          <input class="field" name="campaign_key" placeholder="campaign-key" required />
+          <button type="submit">Create Page</button>
+        </form>
+      </DashboardSection>
+
+      <DashboardSection title="Campaigns">
+        <div class="table-wrap small">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Key</th>
+                <th>Leads</th>
+              </tr>
+            </thead>
+            <tbody id="campaignsTable">
+              <tr>
+                <td colspan="3" class="empty">Loading campaigns...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </DashboardSection>
+
+      <DashboardSection title="Pages">
+        <div class="table-wrap small">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Leads</th>
+              </tr>
+            </thead>
+            <tbody id="pagesTable">
+              <tr>
+                <td colspan="3" class="empty">Loading pages...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </DashboardSection>
+    </div>
+  </DashboardGrid>
 
   <script>
     const API_BASE = "http://127.0.0.1:8787";
 
     const state = {
       leads: [],
-      campaigns: []
+      filteredLeads: [],
+      campaigns: [],
+      pages: []
     };
 
     const totalLeads = document.getElementById("totalLeads");
     const todaysLeads = document.getElementById("todaysLeads");
     const newLeads = document.getElementById("newLeads");
     const campaignCount = document.getElementById("campaignCount");
+
     const leadsTable = document.getElementById("leadsTable");
     const campaignsTable = document.getElementById("campaignsTable");
+    const pagesTable = document.getElementById("pagesTable");
+
     const refreshBtn = document.getElementById("refreshBtn");
     const exportBtn = document.getElementById("exportBtn");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+
     const campaignForm = document.getElementById("campaignForm");
-    const campaignMessage = document.getElementById("campaignMessage");
+    const pageForm = document.getElementById("pageForm");
+
+    function toast(message, type = "success") {
+      if (window.LiwoxToast) {
+        window.LiwoxToast(message, type);
+      } else {
+        alert(message);
+      }
+    }
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -428,16 +183,6 @@
         .replaceAll("'", "&#039;");
     }
 
-    function showMessage(element, text, type) {
-      element.className = `message ${type}`;
-      element.textContent = text;
-
-      setTimeout(() => {
-        element.className = "message";
-        element.textContent = "";
-      }, 5000);
-    }
-
     function formatDate(value) {
       if (!value) return "";
       try {
@@ -445,6 +190,24 @@
       } catch {
         return value;
       }
+    }
+
+    function statusBadge(status) {
+      const value = status || "new";
+      const normalized = String(value).toLowerCase();
+
+      return `<span class="status-badge status-${escapeHtml(normalized)}">${escapeHtml(value)}</span>`;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "API request failed");
+      }
+
+      return data;
     }
 
     function updateStats() {
@@ -460,25 +223,48 @@
       campaignCount.textContent = String(state.campaigns.length);
     }
 
+    function applyFilters() {
+      const query = String(searchInput.value || "").toLowerCase().trim();
+      const status = statusFilter.value;
+
+      state.filteredLeads = state.leads.filter((lead) => {
+        const haystack = [
+          lead.full_name,
+          lead.email,
+          lead.phone,
+          lead.campaign_name,
+          lead.source,
+          lead.status
+        ].join(" ").toLowerCase();
+
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesStatus = status === "all" || lead.status === status;
+
+        return matchesQuery && matchesStatus;
+      });
+
+      renderLeads();
+    }
+
     function renderLeads() {
-      if (!state.leads.length) {
+      if (!state.filteredLeads.length) {
         leadsTable.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">No leads yet</td>
+            <td colspan="8" class="empty">No leads found</td>
           </tr>
         `;
         return;
       }
 
-      leadsTable.innerHTML = state.leads.map((lead) => `
+      leadsTable.innerHTML = state.filteredLeads.map((lead) => `
         <tr>
           <td>${escapeHtml(lead.id)}</td>
           <td><strong>${escapeHtml(lead.full_name)}</strong></td>
           <td>${escapeHtml(lead.email)}</td>
           <td>${escapeHtml(lead.phone)}</td>
-          <td>${lead.campaign_name ? escapeHtml(lead.campaign_name) : '<span class="pill empty">No campaign</span>'}</td>
+          <td>${lead.campaign_name ? escapeHtml(lead.campaign_name) : "—"}</td>
           <td>${escapeHtml(lead.source)}</td>
-          <td><span class="pill ${lead.status === "new" ? "new" : ""}">${escapeHtml(lead.status)}</span></td>
+          <td>${statusBadge(lead.status)}</td>
           <td>${escapeHtml(formatDate(lead.created_at))}</td>
         </tr>
       `).join("");
@@ -488,7 +274,7 @@
       if (!state.campaigns.length) {
         campaignsTable.innerHTML = `
           <tr>
-            <td colspan="3" class="empty-state">No campaigns yet</td>
+            <td colspan="3" class="empty">No campaigns yet</td>
           </tr>
         `;
         return;
@@ -497,69 +283,73 @@
       campaignsTable.innerHTML = state.campaigns.map((campaign) => `
         <tr>
           <td><strong>${escapeHtml(campaign.name)}</strong></td>
-          <td><span class="pill">${escapeHtml(campaign.campaign_key)}</span></td>
+          <td>${escapeHtml(campaign.campaign_key)}</td>
           <td>${escapeHtml(campaign.lead_count ?? 0)}</td>
         </tr>
       `).join("");
     }
 
-    async function fetchJson(url) {
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || "API request failed");
+    function renderPages() {
+      if (!state.pages.length) {
+        pagesTable.innerHTML = `
+          <tr>
+            <td colspan="3" class="empty">No pages yet</td>
+          </tr>
+        `;
+        return;
       }
 
-      return data;
+      pagesTable.innerHTML = state.pages.map((page) => `
+        <tr>
+          <td><strong>${escapeHtml(page.title)}</strong></td>
+          <td><a href="/${escapeHtml(page.slug)}" target="_blank">${escapeHtml(page.slug)}</a></td>
+          <td>${escapeHtml(page.lead_count ?? 0)}</td>
+        </tr>
+      `).join("");
     }
 
     async function loadDashboard() {
-      refreshBtn.textContent = "Loading...";
       refreshBtn.disabled = true;
+      refreshBtn.textContent = "Loading...";
 
       try {
-        const [leadsData, campaignsData] = await Promise.all([
+        const [leadsData, campaignsData, pagesData] = await Promise.all([
           fetchJson(`${API_BASE}/api/leads`),
-          fetchJson(`${API_BASE}/api/campaigns`)
+          fetchJson(`${API_BASE}/api/campaigns`),
+          fetchJson(`${API_BASE}/api/pages`)
         ]);
 
         state.leads = leadsData.leads || [];
+        state.filteredLeads = state.leads;
         state.campaigns = campaignsData.campaigns || [];
+        state.pages = pagesData.pages || [];
 
         updateStats();
-        renderLeads();
+        applyFilters();
         renderCampaigns();
+        renderPages();
       } catch (error) {
+        toast(error.message || "Unable to load dashboard", "error");
         leadsTable.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">Error loading data: ${escapeHtml(error.message)}</td>
+            <td colspan="8" class="empty">Error loading data</td>
           </tr>
         `;
       } finally {
-        refreshBtn.textContent = "Refresh";
         refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
       }
     }
 
     function exportCsv() {
-      if (!state.leads.length) {
-        alert("No leads to export.");
+      if (!state.filteredLeads.length) {
+        toast("No leads to export.", "warning");
         return;
       }
 
-      const headers = [
-        "id",
-        "full_name",
-        "email",
-        "phone",
-        "campaign_name",
-        "source",
-        "status",
-        "created_at"
-      ];
+      const headers = ["id", "full_name", "email", "phone", "campaign_name", "source", "status", "created_at"];
 
-      const rows = state.leads.map((lead) =>
+      const rows = state.filteredLeads.map((lead) =>
         headers.map((header) => {
           const value = String(lead[header] ?? "").replaceAll('"', '""');
           return `"${value}"`;
@@ -583,6 +373,7 @@
       event.preventDefault();
 
       const formData = new FormData(campaignForm);
+
       const payload = {
         name: formData.get("name"),
         campaign_key: formData.get("campaign_key"),
@@ -593,9 +384,7 @@
       try {
         const response = await fetch(`${API_BASE}/api/campaigns`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
@@ -606,17 +395,248 @@
         }
 
         campaignForm.reset();
-        showMessage(campaignMessage, "Campaign created successfully.", "ok");
+        toast("Campaign created successfully.");
         await loadDashboard();
       } catch (error) {
-        showMessage(campaignMessage, error.message, "error");
+        toast(error.message || "Unable to create campaign", "error");
+      }
+    });
+
+    pageForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(pageForm);
+
+      const payload = {
+        title: formData.get("title"),
+        slug: formData.get("slug"),
+        page_key: formData.get("slug"),
+        campaign_key: formData.get("campaign_key"),
+        page_type: "landing_page",
+        status: "published"
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/api/pages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Unable to create page");
+        }
+
+        pageForm.reset();
+        toast("Landing page created successfully.");
+        await loadDashboard();
+      } catch (error) {
+        toast(error.message || "Unable to create page", "error");
       }
     });
 
     refreshBtn.addEventListener("click", loadDashboard);
     exportBtn.addEventListener("click", exportCsv);
+    searchInput.addEventListener("input", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
 
     loadDashboard();
   </script>
-</body>
-</html>
+
+  <style>
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric-card p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .metric-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 2rem;
+      letter-spacing: -.04em;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      min-height: 46px;
+    }
+
+    .search-box span {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      font: inherit;
+      background: transparent;
+    }
+
+    .toolbar select,
+    .toolbar button,
+    .form-grid button {
+      min-height: 44px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toolbar select {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .toolbar button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font: inherit;
+      background: #fff;
+    }
+
+    textarea.field {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .table-wrap.small table {
+      min-width: 420px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 840px;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: .92rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 900;
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .status-new {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-contacted {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .status-qualified {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-archived {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 980px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</AdminLayout>
