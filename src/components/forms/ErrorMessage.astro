@@ -1,0 +1,30 @@
+---
+const {
+  title = "Error",
+  message = "Something went wrong. Please try again."
+} = Astro.props;
+---
+
+<div class="error-message">
+  <strong>{title}</strong>
+  <p>{message}</p>
+</div>
+
+<style>
+  .error-message {
+    border-radius: 14px;
+    padding: 14px 16px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

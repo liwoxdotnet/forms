@@ -1,0 +1,68 @@
+---
+const {
+  label = "Phone Number",
+  name = "phone",
+  placeholder = "Phone Number",
+  required = false,
+  countryCode = "+44"
+} = Astro.props;
+---
+
+<label class="phone-wrap">
+  {label && <span>{label}</span>}
+
+  <div class="phone-input">
+    <strong>{countryCode}</strong>
+    <input
+      type="tel"
+      name={name}
+      placeholder={placeholder}
+      required={required}
+    />
+  </div>
+</label>
+
+<style>
+  .phone-wrap {
+    display: grid;
+    gap: 6px;
+  }
+
+  span {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  .phone-input {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  strong {
+    padding: 0 13px;
+    color: #374151;
+    border-right: 1px solid #e5e7eb;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+  }
+
+  input {
+    width: 100%;
+    border: 0;
+    padding: 13px 14px;
+    font: inherit;
+    outline: 0;
+  }
+
+  .phone-input:focus-within {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  }
+</style>

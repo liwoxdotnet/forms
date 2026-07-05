@@ -1,0 +1,44 @@
+---
+const {
+  title = "Form Section",
+  description = ""
+} = Astro.props;
+---
+
+<section class="form-section">
+  <div class="section-head">
+    <h3>{title}</h3>
+    {description && <p>{description}</p>}
+  </div>
+
+  <div class="section-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .form-section {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--muted);
+  }
+
+  .section-body {
+    display: grid;
+    gap: 12px;
+  }
+</style>

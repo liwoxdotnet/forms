@@ -1,0 +1,47 @@
+---
+const {
+  value = 50,
+  label = "Progress"
+} = Astro.props;
+
+const safeValue = Math.max(0, Math.min(100, Number(value)));
+---
+
+<div class="progress-wrap">
+  <div class="progress-top">
+    <span>{label}</span>
+    <strong>{safeValue}%</strong>
+  </div>
+
+  <div class="track">
+    <div class="bar" style={`width:${safeValue}%`}></div>
+  </div>
+</div>
+
+<style>
+  .progress-wrap {
+    display: grid;
+    gap: 8px;
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .track {
+    height: 12px;
+    border-radius: 999px;
+    background: #dbeafe;
+    overflow: hidden;
+  }
+
+  .bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+  }
+</style>

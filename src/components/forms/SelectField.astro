@@ -1,0 +1,48 @@
+---
+const {
+  label = "",
+  name = "",
+  required = false,
+  options = [
+    { label: "Select an option", value: "" }
+  ]
+} = Astro.props;
+---
+
+<label class="select-wrap">
+  {label && <span>{label}</span>}
+
+  <select name={name} required={required}>
+    {options.map((option) => (
+      <option value={option.value}>{option.label}</option>
+    ))}
+  </select>
+</label>
+
+<style>
+  .select-wrap {
+    display: grid;
+    gap: 6px;
+  }
+
+  span {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font: inherit;
+    background: #fff;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  }
+</style>

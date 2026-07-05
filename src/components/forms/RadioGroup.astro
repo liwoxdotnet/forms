@@ -1,0 +1,64 @@
+---
+const {
+  name = "radio",
+  label = "Choose an option",
+  options = [
+    { label: "Option One", value: "one" },
+    { label: "Option Two", value: "two" }
+  ],
+  required = false
+} = Astro.props;
+---
+
+<fieldset class="radio-group">
+  <legend>{label}</legend>
+
+  <div class="options">
+    {options.map((option) => (
+      <label class="radio">
+        <input
+          type="radio"
+          name={name}
+          value={option.value}
+          required={required}
+        />
+        <span>{option.label}</span>
+      </label>
+    ))}
+  </div>
+</fieldset>
+
+<style>
+  .radio-group {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  legend {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+
+  .options {
+    display: grid;
+    gap: 9px;
+  }
+
+  .radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--blue);
+  }
+</style>

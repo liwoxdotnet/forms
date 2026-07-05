@@ -1,0 +1,42 @@
+---
+const {
+  name = "",
+  label = "Checkbox label",
+  value = "yes",
+  checked = false,
+  required = false
+} = Astro.props;
+---
+
+<label class="checkbox">
+  <input
+    type="checkbox"
+    name={name}
+    value={value}
+    checked={checked}
+    required={required}
+  />
+  <span>{label}</span>
+</label>
+
+<style>
+  .checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: 700;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--blue);
+  }
+
+  span {
+    line-height: 1.35;
+  }
+</style>
