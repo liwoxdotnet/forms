@@ -1,0 +1,32 @@
+---
+const {
+  padding = "md"
+} = Astro.props;
+
+const className = `lx-card-component lx-card-${padding}`;
+---
+
+<div class={className}>
+  <slot />
+</div>
+
+<style>
+  .lx-card-component {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .lx-card-sm {
+    padding: 16px;
+  }
+
+  .lx-card-md {
+    padding: 20px;
+  }
+
+  .lx-card-lg {
+    padding: 28px;
+  }
+</style>

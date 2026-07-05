@@ -1,0 +1,88 @@
+---
+const {
+  href = "",
+  type = "button",
+  variant = "primary",
+  size = "md",
+  full = false
+} = Astro.props;
+
+const className = [
+  "lx-btn",
+  `lx-btn-${variant}`,
+  `lx-btn-${size}`,
+  full ? "lx-btn-full" : ""
+].join(" ");
+---
+
+{href ? (
+  <a href={href} class={className}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class={className}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .lx-btn {
+    border: 0;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .lx-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .lx-btn-primary {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .lx-btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .lx-btn-danger {
+    background: var(--red);
+    color: #fff;
+  }
+
+  .lx-btn-success {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .lx-btn-sm {
+    min-height: 36px;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+  }
+
+  .lx-btn-md {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+
+  .lx-btn-lg {
+    min-height: 54px;
+    padding: 16px 22px;
+    font-size: 1.05rem;
+  }
+
+  .lx-btn-full {
+    width: 100%;
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+const {
+  label = "",
+  name = "",
+  type = "text",
+  placeholder = "",
+  required = false,
+  value = ""
+} = Astro.props;
+---
+
+<label class="field-wrap">
+  {label && <span>{label}</span>}
+  <input
+    class="field"
+    name={name}
+    type={type}
+    placeholder={placeholder}
+    required={required}
+    value={value}
+  />
+</label>
+
+<style>
+  .field-wrap {
+    display: grid;
+    gap: 6px;
+  }
+
+  span {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  .field {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font: inherit;
+    background: #fff;
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  }
+</style>

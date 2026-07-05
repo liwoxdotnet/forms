@@ -1,0 +1,59 @@
+---
+const {
+  title = "Nothing here yet",
+  description = "When records are created, they will appear here.",
+  actionText = "",
+  actionHref = ""
+} = Astro.props;
+---
+
+<div class="empty-state">
+  <div class="icon">∅</div>
+  <h3>{title}</h3>
+  <p>{description}</p>
+
+  {actionText && actionHref && (
+    <a class="action" href={actionHref}>{actionText}</a>
+  )}
+</div>
+
+<style>
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 34px 20px;
+  }
+
+  .icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #6b7280;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 14px;
+    font-size: 1.5rem;
+    font-weight: 900;
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .action {
+    display: inline-flex;
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--blue);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+  }
+</style>
