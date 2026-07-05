@@ -1,408 +1,81 @@
 ---
 export const prerender = false;
 
+import LandingLayout from "../components/layouts/LandingLayout.astro";
+import Hero from "../components/landing/Hero.astro";
+import LeadForm from "../components/forms/LeadForm.astro";
+
 const slugParam = Astro.params.slug;
-const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam;
+const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam || "default";
+
+const API_BASE = "http://127.0.0.1:8787";
+
+let pageConfig = {
+  slug,
+  page_key: slug,
+  title: "Register Your Interest",
+  description: "Complete the short form and our team will contact you with the next step.",
+  campaign_key: slug,
+  campaign_name: "Liwox Campaign",
+  form_key: "",
+  form_name: "Apply Now"
+};
+
+try {
+  const response = await fetch(`${API_BASE}/api/pages/${slug}`);
+  const data = await response.json();
+
+  if (data.success && data.page) {
+    pageConfig = {
+      ...pageConfig,
+      slug: data.page.slug || slug,
+      page_key: data.page.page_key || slug,
+      title: data.page.title || pageConfig.title,
+      description: data.page.description || pageConfig.description,
+      campaign_key: data.page.campaign_key || slug,
+      campaign_name: data.page.campaign_name || "Liwox Campaign",
+      form_key: data.page.form_key || "",
+      form_name: data.page.form_name || "Apply Now"
+    };
+  }
+} catch (error) {
+  // If API page config is unavailable, the page still works with fallback content.
+}
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<LandingLayout
+  title={pageConfig.title}
+  description={pageConfig.description}
+>
+  <main class="landing-page">
+    <Hero
+      badge={pageConfig.campaign_name}
+      title={pageConfig.title}
+      description={pageConfig.description}
+    />
 
-  <title>Liwox Landing Page</title>
-
-  <style>
-    :root {
-      --navy: #06142f;
-      --blue: #2563eb;
-      --sky: #dbeafe;
-      --text: #111827;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --card: #ffffff;
-      --bg: #f8fafc;
-      --green: #16a34a;
-      --red: #dc2626;
-      --radius: 18px;
-      --shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
-      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .page {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 460px;
-    }
-
-    .hero {
-      background:
-        radial-gradient(circle at top right, rgba(37, 99, 235, 0.35), transparent 35%),
-        linear-gradient(135deg, #06142f, #0b1d42);
-      color: #fff;
-      padding: clamp(32px, 6vw, 80px);
-      display: flex;
-      align-items: center;
-    }
-
-    .hero-inner {
-      max-width: 780px;
-    }
-
-    .badge {
-      display: inline-flex;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      color: #bfdbfe;
-      font-size: 0.85rem;
-      font-weight: 800;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      margin: 0 0 18px;
-      font-size: clamp(2.4rem, 7vw, 5rem);
-      line-height: 1.02;
-      letter-spacing: -0.06em;
-    }
-
-    .lead {
-      margin: 0 0 28px;
-      font-size: clamp(1.05rem, 2.8vw, 1.45rem);
-      color: #dbeafe;
-      max-width: 700px;
-    }
-
-    .benefits {
-      display: grid;
-      gap: 14px;
-      margin-top: 28px;
-      max-width: 660px;
-    }
-
-    .benefit {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      font-size: 1rem;
-      color: #e5efff;
-    }
-
-    .check {
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: #60a5fa;
-      color: #06142f;
-      display: inline-grid;
-      place-items: center;
-      flex: 0 0 auto;
-      font-weight: 1000;
-    }
-
-    .form-panel {
-      background: #fff;
-      padding: clamp(24px, 4vw, 48px);
-      display: flex;
-      align-items: center;
-      border-left: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .form-card {
-      width: 100%;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-
-    .form-card h2 {
-      margin: 0 0 8px;
-      font-size: 1.75rem;
-      letter-spacing: -0.04em;
-    }
-
-    .form-card p {
-      margin: 0 0 22px;
-      color: var(--muted);
-    }
-
-    .field {
-      width: 100%;
-      padding: 15px 16px;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      font: inherit;
-      margin-bottom: 12px;
-      outline: none;
-    }
-
-    .field:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    }
-
-    textarea.field {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    button {
-      width: 100%;
-      border: 0;
-      background: var(--blue);
-      color: #fff;
-      padding: 16px 20px;
-      border-radius: 12px;
-      font: inherit;
-      font-weight: 900;
-      cursor: pointer;
-      min-height: 54px;
-    }
-
-    button:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .message {
-      display: none;
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-weight: 700;
-    }
-
-    .message.ok {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .message.error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .meta {
-      margin-top: 18px;
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    @media (max-width: 900px) {
-      .page {
-        grid-template-columns: 1fr;
-      }
-
-      .form-panel {
-        border-left: 0;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <main class="page" data-slug={slug}>
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="badge" id="campaignBadge">Liwox Campaign</div>
-
-        <h1 id="pageTitle">Register Your Interest</h1>
-
-        <p class="lead" id="pageDescription">
-          Complete the short form and our team will contact you with the next step.
-        </p>
-
-        <div class="benefits">
-          <div class="benefit">
-            <span class="check">✓</span>
-            <span>Submit your details in less than one minute.</span>
-          </div>
-
-          <div class="benefit">
-            <span class="check">✓</span>
-            <span>Your enquiry goes directly into the Liwox lead dashboard.</span>
-          </div>
-
-          <div class="benefit">
-            <span class="check">✓</span>
-            <span>Our team can follow up quickly based on your campaign source.</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="form-panel">
-      <div class="form-card">
-        <h2 id="formTitle">Apply Now</h2>
-        <p id="formDescription">Enter your details below.</p>
-
-        <form id="leadForm">
-          <input class="field" name="full_name" placeholder="Full Name" required />
-          <input class="field" type="email" name="email" placeholder="Email Address" required />
-          <input class="field" name="phone" placeholder="Phone Number" />
-          <input class="field" name="company" placeholder="Company / Organisation (optional)" />
-          <textarea class="field" name="message" placeholder="Message or notes (optional)"></textarea>
-
-          <button id="submitBtn" type="submit">Submit</button>
-
-          <div id="statusMessage" class="message"></div>
-        </form>
-
-        <div class="meta">
-          Powered by Liwox Forms
-        </div>
-      </div>
-    </section>
+    <LeadForm
+      title={pageConfig.form_name}
+      description="Enter your details below."
+      apiBase={API_BASE}
+      campaignKey={pageConfig.campaign_key}
+      pageKey={pageConfig.page_key}
+      formKey={pageConfig.form_key}
+      source={slug}
+    />
   </main>
+</LandingLayout>
 
-  <script>
-    const API_BASE = "http://127.0.0.1:8787";
-    const pageSlug = document.querySelector(".page").dataset.slug || "default";
+<style>
+  .landing-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 460px;
+  }
 
-    let pageConfig = {
-      slug: pageSlug,
-      page_key: pageSlug,
-      title: "Register Your Interest",
-      description: "Complete the short form and our team will contact you with the next step.",
-      campaign_key: null,
-      campaign_name: "Liwox Campaign",
-      form_key: null,
-      form_name: "Apply Now"
-    };
-
-    const campaignBadge = document.getElementById("campaignBadge");
-    const pageTitle = document.getElementById("pageTitle");
-    const pageDescription = document.getElementById("pageDescription");
-    const formTitle = document.getElementById("formTitle");
-    const formDescription = document.getElementById("formDescription");
-    const leadForm = document.getElementById("leadForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const statusMessage = document.getElementById("statusMessage");
-
-    function showMessage(text, type) {
-      statusMessage.className = `message ${type}`;
-      statusMessage.textContent = text;
+  @media (max-width: 900px) {
+    .landing-page {
+      grid-template-columns: 1fr;
     }
-
-    function getUtmParams() {
-      const params = new URLSearchParams(window.location.search);
-
-      return {
-        utm_source: params.get("utm_source"),
-        utm_medium: params.get("utm_medium"),
-        utm_campaign: params.get("utm_campaign"),
-        utm_term: params.get("utm_term"),
-        utm_content: params.get("utm_content")
-      };
-    }
-
-    function applyPageConfig() {
-      document.title = pageConfig.title || "Liwox Landing Page";
-      campaignBadge.textContent = pageConfig.campaign_name || pageConfig.campaign_key || "Liwox Campaign";
-      pageTitle.textContent = pageConfig.title || "Register Your Interest";
-      pageDescription.textContent = pageConfig.description || "Complete the short form and our team will contact you with the next step.";
-      formTitle.textContent = pageConfig.form_name || "Apply Now";
-      formDescription.textContent = "Enter your details below.";
-    }
-
-    async function loadPageConfig() {
-      try {
-        const response = await fetch(`${API_BASE}/api/pages`);
-        const data = await response.json();
-
-        if (!data.success) return;
-
-        const matched = (data.pages || []).find((page) => page.slug === pageSlug || page.page_key === pageSlug);
-
-        if (matched) {
-          pageConfig = {
-            ...pageConfig,
-            slug: matched.slug,
-            page_key: matched.page_key,
-            title: matched.title,
-            description: matched.description || pageConfig.description,
-            campaign_key: matched.campaign_key,
-            campaign_name: matched.campaign_name,
-            form_key: matched.form_key || null,
-            form_name: matched.form_name || "Apply Now"
-          };
-        }
-
-        applyPageConfig();
-      } catch (error) {
-        applyPageConfig();
-      }
-    }
-
-    leadForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-      statusMessage.className = "message";
-      statusMessage.textContent = "";
-
-      const formData = new FormData(leadForm);
-      const utm = getUtmParams();
-
-      const payload = {
-        campaign_key: pageConfig.campaign_key || pageSlug,
-        page_key: pageConfig.page_key || pageSlug,
-        form_key: pageConfig.form_key,
-        full_name: formData.get("full_name"),
-        email: formData.get("email"),
-        phone: formData.get("phone"),
-        company: formData.get("company"),
-        message: formData.get("message"),
-        source: pageSlug,
-        referrer: document.referrer,
-        ...utm
-      };
-
-      try {
-        const response = await fetch(`${API_BASE}/api/leads`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-          throw new Error(data.error || "Submission failed");
-        }
-
-        leadForm.reset();
-        showMessage("Thank you. Your details have been submitted successfully.", "ok");
-      } catch (error) {
-        showMessage(error.message || "Something went wrong. Please try again.", "error");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit";
-      }
-    });
-
-    loadPageConfig();
-  </script>
-</body>
-</html>
+  }
+</style>
