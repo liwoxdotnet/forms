@@ -4,242 +4,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="generator" content={Astro.generator} />
-  <title>Liwox Forms</title>
-
-  <style>
-    :root {
-      --bg: #020617;
-      --text: #ffffff;
-      --muted: #cbd5e1;
-      --blue: #3b82f6;
-      --cyan: #22d3ee;
-      --violet: #8b5cf6;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-    }
-
-    .page {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      position: relative;
-      padding: 28px;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(59,130,246,.28), transparent 30%),
-        radial-gradient(circle at 80% 25%, rgba(139,92,246,.25), transparent 32%),
-        radial-gradient(circle at 50% 90%, rgba(34,211,238,.16), transparent 34%),
-        linear-gradient(135deg, #020617, #07111f 55%, #020617);
-    }
-
-    .grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black, transparent 72%);
-      animation: drift 20s linear infinite;
-    }
-
-    .orb {
-      position: absolute;
-      width: 340px;
-      height: 340px;
-      border-radius: 999px;
-      filter: blur(78px);
-      opacity: .42;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .orb.one {
-      background: var(--blue);
-      top: 10%;
-      left: 10%;
-    }
-
-    .orb.two {
-      background: var(--violet);
-      right: 8%;
-      bottom: 10%;
-      animation-delay: -3s;
-    }
-
-    .glow {
-      position: fixed;
-      width: 360px;
-      height: 360px;
-      border-radius: 999px;
-      pointer-events: none;
-      background: radial-gradient(circle, rgba(34,211,238,.16), transparent 65%);
-      transform: translate(-50%, -50%);
-      left: 50%;
-      top: 50%;
-      z-index: 1;
-    }
-
-    .hero {
-      position: relative;
-      z-index: 2;
-      width: min(420px, 92vw);
-      text-align: center;
-      padding: 34px 26px;
-      border: 1px solid rgba(255,255,255,.13);
-      border-radius: 26px;
-      background: rgba(255,255,255,.055);
-      box-shadow: 0 32px 100px rgba(0,0,0,.36);
-      backdrop-filter: blur(20px);
-      animation: reveal .9s ease both, softFloat 5.5s ease-in-out infinite;
-    }
-
-    .badge {
-      display: inline-flex;
-      padding: 7px 12px;
-      border-radius: 999px;
-      color: #bfdbfe;
-      background: rgba(59,130,246,.14);
-      border: 1px solid rgba(147,197,253,.22);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      font-size: clamp(46px, 9vw, 74px);
-      line-height: .88;
-      letter-spacing: -.075em;
-      margin-bottom: 18px;
-      text-shadow: 0 18px 50px rgba(0,0,0,.35);
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 15.5px;
-      line-height: 1.55;
-      max-width: 330px;
-      margin: 0 auto 28px;
-    }
-
-    .start {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 148px;
-      min-height: 54px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--blue), var(--cyan));
-      color: white;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: .17em;
-      box-shadow: 0 18px 60px rgba(37,99,235,.45);
-      transition: transform .25s ease, box-shadow .25s ease;
-    }
-
-    .start:hover {
-      transform: translateY(-3px) scale(1.04);
-      box-shadow: 0 24px 80px rgba(34,211,238,.5);
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 22px;
-      z-index: 2;
-      color: rgba(255,255,255,.45);
-      font-size: 12px;
-      letter-spacing: .12em;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-22px) scale(1.08); }
-    }
-
-    @keyframes softFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    @keyframes drift {
-      from { transform: translateY(0); }
-      to { transform: translateY(42px); }
-    }
-
-    @keyframes reveal {
-      from {
-        opacity: 0;
-        transform: translateY(18px) scale(.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        overflow: auto;
-      }
-
-      .hero {
-        width: min(360px, 92vw);
-        padding: 30px 22px;
-      }
-
-      h1 {
-        letter-spacing: -.06em;
-      }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+<title>Liwox Forms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#020617;--panel:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--text:#fff;--muted:#cbd5e1;--blue:#2563eb;--cyan:#22d3ee;--violet:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;overflow:hidden;font-family:"Space Grotesk",sans-serif;color:var(--text);background:radial-gradient(circle at 15% 20%,rgba(37,99,235,.28),transparent 28%),radial-gradient(circle at 82% 25%,rgba(139,92,246,.22),transparent 30%),radial-gradient(circle at 55% 85%,rgba(34,211,238,.18),transparent 32%),#020617}
+.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,black,transparent 74%);animation:drift 22s linear infinite}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.42;animation:float 9s ease-in-out infinite}
+.o1{width:340px;height:340px;background:var(--blue);top:5%;left:8%}
+.o2{width:320px;height:320px;background:var(--violet);right:8%;bottom:10%;animation-delay:-4s}
+.glow{position:fixed;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.18),transparent 70%);pointer-events:none;transform:translate(-50%,-50%)}
+main{display:grid;place-items:center;min-height:100vh;padding:24px;position:relative}
+.hero{width:min(430px,92vw);padding:34px 28px;border-radius:28px;border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(18px);text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.45);z-index:2;animation:appear .9s ease}
+.badge{display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(37,99,235,.15);color:#bfdbfe;letter-spacing:.16em;text-transform:uppercase;font-size:11px;margin-bottom:18px}
+h1{font-size:82px;line-height:.85;font-weight:800;letter-spacing:-.08em}
+.brand-small{display:block;text-align:right;font-size:.34em;font-weight:500;letter-spacing:.6em;color:#dbeafe;margin-top:4px}
+p{color:var(--muted);line-height:1.7;font-size:15px;margin:22px auto 30px;max-width:320px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-width:165px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;text-decoration:none;font-weight:800;letter-spacing:.18em;transition:.25s;box-shadow:0 16px 48px rgba(37,99,235,.45)}
+.btn:hover{transform:translateY(-3px) scale(1.04)}
+footer{position:fixed;bottom:18px;width:100%;text-align:center;color:rgba(255,255,255,.45);font-size:12px;letter-spacing:.14em}
+@keyframes float{50%{transform:translateY(-22px)}}@keyframes drift{to{transform:translateY(42px)}}@keyframes appear{from{opacity:0;transform:translateY(18px) scale(.98)}}
+</style>
 </head>
-
 <body>
-  <main class="page">
-    <div class="grid"></div>
-    <div class="orb one"></div>
-    <div class="orb two"></div>
-    <div class="glow" id="glow"></div>
-
-    <section class="hero">
-      <div class="badge">Lead Capture Infrastructure</div>
-
-      <h1>LIWOX<br />FORMS</h1>
-
-      <p class="subtitle">
-        Elegant lead capture pages for focused Liwox campaigns.
-      </p>
-
-      <a class="start" href="/admin">START</a>
-    </section>
-
-    <div class="footer">POWERED BY LIWOX GROUP</div>
-  </main>
-
-  <script>
-    const glow = document.getElementById("glow");
-
-    window.addEventListener("pointermove", (event) => {
-      glow.style.left = `${event.clientX}px`;
-      glow.style.top = `${event.clientY}px`;
-    });
-  </script>
+<div class="grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="glow" id="glow"></div>
+<main><section class="hero"><div class="badge">Lead Capture Infrastructure</div><h1>LIWOX<span class="brand-small">FORMS</span></h1><p>Elegant lead capture experiences for every Liwox campaign, powered by Cloudflare.</p><a class="btn" href="/admin">START</a></section></main>
+<footer>POWERED BY LIWOX GROUP</footer>
+<script>
+const glow=document.getElementById('glow');
+window.addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+</script>
 </body>
 </html>
