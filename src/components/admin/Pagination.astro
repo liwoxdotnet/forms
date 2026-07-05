@@ -1,0 +1,41 @@
+---
+const {
+  current = 1,
+  total = 1
+} = Astro.props;
+---
+
+<div class="pagination">
+  <button type="button" disabled={current <= 1}>Previous</button>
+  <span>Page {current} of {total}</span>
+  <button type="button" disabled={current >= total}>Next</button>
+</div>
+
+<style>
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  span {
+    color: var(--muted);
+    font-weight: 700;
+  }
+</style>

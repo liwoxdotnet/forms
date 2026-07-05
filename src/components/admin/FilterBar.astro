@@ -1,0 +1,43 @@
+---
+const {
+  statusOptions = ["all", "new", "contacted", "qualified", "archived"]
+} = Astro.props;
+---
+
+<div class="filter-bar">
+  <select id="statusFilter">
+    {statusOptions.map((status) => (
+      <option value={status}>{status}</option>
+    ))}
+  </select>
+
+  <select id="campaignFilter">
+    <option value="all">all campaigns</option>
+  </select>
+
+  <button type="button" id="clearFilters">Clear</button>
+</div>
+
+<style>
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar select,
+  .filter-bar button {
+    min-height: 42px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 12px;
+    padding: 0 12px;
+    font: inherit;
+    font-weight: 700;
+  }
+
+  .filter-bar button {
+    cursor: pointer;
+    background: #f3f4f6;
+  }
+</style>

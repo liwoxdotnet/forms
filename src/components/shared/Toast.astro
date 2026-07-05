@@ -1,0 +1,75 @@
+---
+const {
+  id = "toast-root"
+} = Astro.props;
+---
+
+<div id={id} class="toast-root"></div>
+
+<script>
+  window.LiwoxToast = function(message, type = "success") {
+    const root = document.getElementById("toast-root");
+    if (!root) return;
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    root.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("show");
+    }, 20);
+
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 250);
+    }, 3500);
+  };
+</script>
+
+<style>
+  .toast-root {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 120;
+    display: grid;
+    gap: 10px;
+  }
+
+  .toast {
+    min-width: 260px;
+    max-width: 380px;
+    background: #111827;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+    font-weight: 800;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast-success {
+    background: #166534;
+  }
+
+  .toast-error {
+    background: #991b1b;
+  }
+
+  .toast-warning {
+    background: #9a3412;
+  }
+
+  .toast-info {
+    background: #075985;
+  }
+</style>

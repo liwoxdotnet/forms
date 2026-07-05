@@ -1,0 +1,35 @@
+---
+const {
+  label = "Loading..."
+} = Astro.props;
+---
+
+<div class="spinner-wrap" role="status" aria-label={label}>
+  <span class="spinner"></span>
+  <span>{label}</span>
+</div>
+
+<style>
+  .spinner-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid #dbeafe;
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

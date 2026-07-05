@@ -1,0 +1,42 @@
+---
+const {
+  items = [
+    { question: "Can I edit this?", answer: "Yes. Replace this content with your own FAQ." },
+    { question: "Can this be reused?", answer: "Yes. This component can be used on any landing page." }
+  ]
+} = Astro.props;
+---
+
+<div class="accordion">
+  {items.map((item, index) => (
+    <details class="item" open={index === 0}>
+      <summary>{item.question}</summary>
+      <p>{item.answer}</p>
+    </details>
+  ))}
+</div>
+
+<style>
+  .accordion {
+    display: grid;
+    gap: 12px;
+  }
+
+  .item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  p {
+    margin: 10px 0 0;
+    color: var(--muted);
+  }
+</style>

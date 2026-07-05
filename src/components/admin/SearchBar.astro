@@ -1,0 +1,37 @@
+---
+const {
+  placeholder = "Search...",
+  id = "searchInput"
+} = Astro.props;
+---
+
+<div class="search-bar">
+  <span>⌕</span>
+  <input id={id} type="search" placeholder={placeholder} />
+</div>
+
+<style>
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0 14px;
+    min-height: 46px;
+  }
+
+  .search-bar span {
+    color: var(--muted);
+    font-weight: 900;
+  }
+
+  .search-bar input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    font: inherit;
+    background: transparent;
+  }
+</style>

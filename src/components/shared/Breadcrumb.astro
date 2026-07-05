@@ -1,0 +1,42 @@
+---
+const {
+  items = [
+    { label: "Home", href: "/" },
+    { label: "Dashboard", href: "/admin" }
+  ]
+} = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  {items.map((item, index) => (
+    <>
+      {index > 0 && <span class="separator">/</span>}
+      <a href={item.href}>{item.label}</a>
+    </>
+  ))}
+</nav>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--blue);
+  }
+
+  .separator {
+    color: #cbd5e1;
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+const {
+  tabs = [
+    { id: "tab-1", label: "Tab One" },
+    { id: "tab-2", label: "Tab Two" }
+  ]
+} = Astro.props;
+---
+
+<div class="tabs" data-tabs>
+  <div class="tab-list" role="tablist">
+    {tabs.map((tab, index) => (
+      <button
+        type="button"
+        class={`tab-button ${index === 0 ? "active" : ""}`}
+        data-tab-button={tab.id}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+
+  <slot />
+</div>
+
+<script>
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const tabId = target.dataset.tabButton;
+    if (!tabId) return;
+
+    const tabsRoot = target.closest("[data-tabs]");
+    if (!tabsRoot) return;
+
+    tabsRoot.querySelectorAll("[data-tab-button]").forEach((button) => {
+      button.classList.remove("active");
+    });
+
+    tabsRoot.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+      panel.classList.remove("active");
+    });
+
+    target.classList.add("active");
+    tabsRoot.querySelector(`[data-tab-panel="${tabId}"]`)?.classList.add("active");
+  });
+</script>
+
+<style>
+  .tab-list {
+    display: flex;
+    gap: 8px;
+    background: #eef2ff;
+    padding: 6px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+
+  .tab-button {
+    border: 0;
+    background: transparent;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    color: #475569;
+    white-space: nowrap;
+  }
+
+  .tab-button.active {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  :global([data-tab-panel]) {
+    display: none;
+  }
+
+  :global([data-tab-panel].active) {
+    display: block;
+  }
+</style>
