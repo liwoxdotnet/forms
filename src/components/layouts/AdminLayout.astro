@@ -28,9 +28,9 @@ const {
 
       <nav class="nav">
         <a href="/admin" class={active === "dashboard" ? "active" : ""}>Dashboard</a>
-        <a href="/candidate" class={active === "candidate" ? "active" : ""}>Candidate Page</a>
-        <a href="http://127.0.0.1:8787/api/leads" target="_blank">API Leads</a>
-        <a href="http://127.0.0.1:8787/api/campaigns" target="_blank">API Campaigns</a>
+        <a href="/admin/pages" class={active === "pages" ? "active" : ""}>Landing Pages</a>
+        <a href="/admin/leads" class={active === "leads" ? "active" : ""}>Leads</a>
+        <a href="/admin/campaigns" class={active === "campaigns" ? "active" : ""}>Campaigns</a>
       </nav>
     </aside>
 
@@ -107,6 +107,10 @@ const {
   @media (max-width: 980px) {
     .layout {
       grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      position: relative;
     }
   }
 </style>
