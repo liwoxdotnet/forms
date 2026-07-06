@@ -9,140 +9,170 @@ import Toast from "../components/shared/Toast.astro";
 <AdminLayout title="Liwox Forms Admin" active="dashboard">
   <Toast />
 
-  <PageHeader
-    title="Dashboard"
-    description="View leads, campaigns, pages, and forms from Liwox landing pages."
-  />
+  <section id="loginView" class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-badge">Restricted Area</div>
+      <h1>Liwox Forms Admin</h1>
+      <p>Enter your approved admin email address. We will send you a secure login link.</p>
 
-  <section class="kpi-grid">
-    <div class="metric-card">
-      <p>Total Leads</p>
-      <strong id="totalLeads">0</strong>
-    </div>
+      <form id="loginForm" class="auth-form">
+        <input id="adminEmail" type="email" placeholder="Admin email address" required />
+        <button id="loginBtn" type="submit">Send Login Link</button>
+      </form>
 
-    <div class="metric-card">
-      <p>Today's Leads</p>
-      <strong id="todaysLeads">0</strong>
-    </div>
-
-    <div class="metric-card">
-      <p>New Leads</p>
-      <strong id="newLeads">0</strong>
-    </div>
-
-    <div class="metric-card">
-      <p>Campaigns</p>
-      <strong id="campaignCount">0</strong>
+      <div id="loginMessage" class="auth-message"></div>
     </div>
   </section>
 
-  <div class="toolbar">
-    <div class="search-box">
-      <span>⌕</span>
-      <input id="searchInput" type="search" placeholder="Search leads by name, email, phone, campaign..." />
+  <section id="dashboardView" class="dashboard-hidden">
+    <div class="admin-topline">
+      <PageHeader
+        title="Dashboard"
+        description="View leads, campaigns, pages, and forms from Liwox landing pages."
+      />
+
+      <button id="logoutBtn" type="button" class="logout-btn">Logout</button>
     </div>
 
-    <select id="statusFilter">
-      <option value="all">All statuses</option>
-      <option value="new">New</option>
-      <option value="contacted">Contacted</option>
-      <option value="qualified">Qualified</option>
-      <option value="archived">Archived</option>
-    </select>
-
-    <button id="refreshBtn" type="button">Refresh</button>
-    <button id="exportBtn" type="button" class="secondary">Export CSV</button>
-  </div>
-
-  <DashboardGrid columns={2}>
-    <DashboardSection title="Recent Leads" description="Latest leads captured from all landing pages.">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Campaign</th>
-              <th>Source</th>
-              <th>Status</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-
-          <tbody id="leadsTable">
-            <tr>
-              <td colspan="8" class="empty">Loading leads...</td>
-            </tr>
-          </tbody>
-        </table>
+    <section class="kpi-grid">
+      <div class="metric-card">
+        <p>Total Leads</p>
+        <strong id="totalLeads">0</strong>
       </div>
-    </DashboardSection>
 
-    <div class="side-stack">
-      <DashboardSection title="Create Campaign" description="Create a campaign for tracking landing page leads.">
-        <form id="campaignForm" class="form-grid">
-          <input class="field" name="name" placeholder="Campaign Name" required />
-          <input class="field" name="campaign_key" placeholder="campaign-key" required />
-          <textarea class="field" name="description" placeholder="Description"></textarea>
-          <button type="submit">Create Campaign</button>
-        </form>
-      </DashboardSection>
+      <div class="metric-card">
+        <p>Today's Leads</p>
+        <strong id="todaysLeads">0</strong>
+      </div>
 
-      <DashboardSection title="Create Landing Page" description="Create a page record that dynamic routes can load.">
-        <form id="pageForm" class="form-grid">
-          <input class="field" name="title" placeholder="Page Title" required />
-          <input class="field" name="slug" placeholder="page-slug" required />
-          <input class="field" name="campaign_key" placeholder="campaign-key" required />
-          <button type="submit">Create Page</button>
-        </form>
-      </DashboardSection>
+      <div class="metric-card">
+        <p>New Leads</p>
+        <strong id="newLeads">0</strong>
+      </div>
 
-      <DashboardSection title="Campaigns">
-        <div class="table-wrap small">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Key</th>
-                <th>Leads</th>
-              </tr>
-            </thead>
-            <tbody id="campaignsTable">
-              <tr>
-                <td colspan="3" class="empty">Loading campaigns...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </DashboardSection>
+      <div class="metric-card">
+        <p>Campaigns</p>
+        <strong id="campaignCount">0</strong>
+      </div>
+    </section>
 
-      <DashboardSection title="Pages">
-        <div class="table-wrap small">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Slug</th>
-                <th>Leads</th>
-              </tr>
-            </thead>
-            <tbody id="pagesTable">
-              <tr>
-                <td colspan="3" class="empty">Loading pages...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </DashboardSection>
+    <div class="toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Search leads by name, email, phone, campaign..." />
+      </div>
+
+      <select id="statusFilter">
+        <option value="all">All statuses</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="qualified">Qualified</option>
+        <option value="archived">Archived</option>
+      </select>
+
+      <button id="refreshBtn" type="button">Refresh</button>
+      <button id="exportBtn" type="button" class="secondary">Export CSV</button>
     </div>
-  </DashboardGrid>
+
+    <DashboardGrid columns={2}>
+      <DashboardSection title="Recent Leads" description="Latest leads captured from all landing pages.">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Campaign</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTable">
+              <tr>
+                <td colspan="8" class="empty">Loading leads...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </DashboardSection>
+
+      <div class="side-stack">
+        <DashboardSection title="Create Campaign" description="Create a campaign for tracking landing page leads.">
+          <form id="campaignForm" class="form-grid">
+            <input class="field" name="name" placeholder="Campaign Name" required />
+            <input class="field" name="campaign_key" placeholder="campaign-key" required />
+            <textarea class="field" name="description" placeholder="Description"></textarea>
+            <button type="submit">Create Campaign</button>
+          </form>
+        </DashboardSection>
+
+        <DashboardSection title="Create Landing Page" description="Create a page record that dynamic routes can load.">
+          <form id="pageForm" class="form-grid">
+            <input class="field" name="title" placeholder="Page Title" required />
+            <input class="field" name="slug" placeholder="page-slug" required />
+            <input class="field" name="campaign_key" placeholder="campaign-key" required />
+            <button type="submit">Create Page</button>
+          </form>
+        </DashboardSection>
+
+        <DashboardSection title="Campaigns">
+          <div class="table-wrap small">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Key</th>
+                  <th>Leads</th>
+                </tr>
+              </thead>
+              <tbody id="campaignsTable">
+                <tr>
+                  <td colspan="3" class="empty">Loading campaigns...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </DashboardSection>
+
+        <DashboardSection title="Pages">
+          <div class="table-wrap small">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Slug</th>
+                  <th>Leads</th>
+                </tr>
+              </thead>
+              <tbody id="pagesTable">
+                <tr>
+                  <td colspan="3" class="empty">Loading pages...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </DashboardSection>
+      </div>
+    </DashboardGrid>
+  </section>
 
   <script>
     const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+    const ADMIN_TOKEN_KEY = "liwox_admin_token";
+
+    const loginView = document.getElementById("loginView");
+    const dashboardView = document.getElementById("dashboardView");
+    const loginForm = document.getElementById("loginForm");
+    const adminEmail = document.getElementById("adminEmail");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMessage = document.getElementById("loginMessage");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     const state = {
+      token: "",
       leads: [],
       filteredLeads: [],
       campaigns: [],
@@ -195,12 +225,28 @@ import Toast from "../components/shared/Toast.astro";
     function statusBadge(status) {
       const value = status || "new";
       const normalized = String(value).toLowerCase();
-
       return `<span class="status-badge status-${escapeHtml(normalized)}">${escapeHtml(value)}</span>`;
     }
 
-    async function fetchJson(url) {
-      const response = await fetch(url);
+    function getAuthHeaders() {
+      const headers = { "Content-Type": "application/json" };
+
+      if (state.token) {
+        headers.Authorization = `Bearer ${state.token}`;
+      }
+
+      return headers;
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          ...(state.token ? { Authorization: `Bearer ${state.token}` } : {})
+        }
+      });
+
       const data = await response.json();
 
       if (!data.success) {
@@ -209,6 +255,111 @@ import Toast from "../components/shared/Toast.astro";
 
       return data;
     }
+
+    function showLogin(message = "") {
+      dashboardView.classList.add("dashboard-hidden");
+      loginView.classList.remove("auth-hidden");
+
+      if (message) {
+        loginMessage.className = "auth-message error";
+        loginMessage.textContent = message;
+      }
+    }
+
+    function showDashboard() {
+      loginView.classList.add("auth-hidden");
+      dashboardView.classList.remove("dashboard-hidden");
+    }
+
+    function readTokenFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token");
+
+      if (token) {
+        localStorage.setItem(ADMIN_TOKEN_KEY, token);
+        window.history.replaceState({}, document.title, "/admin");
+      }
+
+      return token;
+    }
+
+    async function checkSession() {
+      const tokenFromUrl = readTokenFromUrl();
+      state.token = tokenFromUrl || localStorage.getItem(ADMIN_TOKEN_KEY) || "";
+
+      if (!state.token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        await fetchJson(`${API_BASE}/api/admin/session`);
+        showDashboard();
+        await loadDashboard();
+      } catch (error) {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        state.token = "";
+        showLogin("Your admin session has expired. Request a new login link.");
+      }
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const email = adminEmail.value.trim();
+      if (!email) return;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Sending...";
+      loginMessage.className = "auth-message";
+      loginMessage.textContent = "";
+
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/send-login-link`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Unable to send login link");
+        }
+
+        loginMessage.className = "auth-message success";
+
+        if (data.login_url) {
+          loginMessage.innerHTML = `
+            Login link generated. Email sending is not configured yet.<br />
+            <a href="${escapeHtml(data.login_url)}">Open secure login link</a>
+          `;
+        } else {
+          loginMessage.textContent = "Login link sent. Check your email.";
+        }
+      } catch (error) {
+        loginMessage.className = "auth-message error";
+        loginMessage.textContent = error.message || "Unable to send login link";
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Send Login Link";
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await fetch(`${API_BASE}/api/admin/logout`, {
+          method: "POST",
+          headers: getAuthHeaders()
+        });
+      } catch {
+        // Ignore logout API errors.
+      }
+
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+      state.token = "";
+      showLogin("You have been logged out.");
+    });
 
     function updateStats() {
       const today = new Date().toISOString().slice(0, 10);
@@ -248,11 +399,7 @@ import Toast from "../components/shared/Toast.astro";
 
     function renderLeads() {
       if (!state.filteredLeads.length) {
-        leadsTable.innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">No leads found</td>
-          </tr>
-        `;
+        leadsTable.innerHTML = `<tr><td colspan="8" class="empty">No leads found</td></tr>`;
         return;
       }
 
@@ -272,11 +419,7 @@ import Toast from "../components/shared/Toast.astro";
 
     function renderCampaigns() {
       if (!state.campaigns.length) {
-        campaignsTable.innerHTML = `
-          <tr>
-            <td colspan="3" class="empty">No campaigns yet</td>
-          </tr>
-        `;
+        campaignsTable.innerHTML = `<tr><td colspan="3" class="empty">No campaigns yet</td></tr>`;
         return;
       }
 
@@ -291,11 +434,7 @@ import Toast from "../components/shared/Toast.astro";
 
     function renderPages() {
       if (!state.pages.length) {
-        pagesTable.innerHTML = `
-          <tr>
-            <td colspan="3" class="empty">No pages yet</td>
-          </tr>
-        `;
+        pagesTable.innerHTML = `<tr><td colspan="3" class="empty">No pages yet</td></tr>`;
         return;
       }
 
@@ -314,9 +453,9 @@ import Toast from "../components/shared/Toast.astro";
 
       try {
         const [leadsData, campaignsData, pagesData] = await Promise.all([
-          fetchJson(`${API_BASE}/api/leads`),
-          fetchJson(`${API_BASE}/api/campaigns`),
-          fetchJson(`${API_BASE}/api/pages`)
+          fetchJson(`${API_BASE}/api/admin/leads`),
+          fetchJson(`${API_BASE}/api/admin/campaigns`),
+          fetchJson(`${API_BASE}/api/admin/pages`)
         ]);
 
         state.leads = leadsData.leads || [];
@@ -330,11 +469,7 @@ import Toast from "../components/shared/Toast.astro";
         renderPages();
       } catch (error) {
         toast(error.message || "Unable to load dashboard", "error");
-        leadsTable.innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">Error loading data</td>
-          </tr>
-        `;
+        leadsTable.innerHTML = `<tr><td colspan="8" class="empty">Error loading data</td></tr>`;
       } finally {
         refreshBtn.disabled = false;
         refreshBtn.textContent = "Refresh";
@@ -384,7 +519,7 @@ import Toast from "../components/shared/Toast.astro";
       try {
         const response = await fetch(`${API_BASE}/api/campaigns`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -419,7 +554,7 @@ import Toast from "../components/shared/Toast.astro";
       try {
         const response = await fetch(`${API_BASE}/api/pages`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
 
@@ -442,10 +577,125 @@ import Toast from "../components/shared/Toast.astro";
     searchInput.addEventListener("input", applyFilters);
     statusFilter.addEventListener("change", applyFilters);
 
-    loadDashboard();
+    checkSession();
   </script>
 
   <style>
+    .auth-shell {
+      min-height: calc(100vh - 56px);
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .auth-hidden,
+    .dashboard-hidden {
+      display: none !important;
+    }
+
+    .auth-card {
+      width: min(430px, 100%);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 32px;
+      text-align: center;
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: .78rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    .auth-card h1 {
+      margin: 0;
+      font-size: 2rem;
+      letter-spacing: -.05em;
+    }
+
+    .auth-card p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 12px 0 22px;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font: inherit;
+    }
+
+    .auth-form button,
+    .logout-btn {
+      min-height: 44px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .auth-form button:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .auth-message {
+      margin-top: 14px;
+      font-size: .92rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .auth-message.success {
+      color: #166534;
+      background: #dcfce7;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .auth-message.error {
+      color: #991b1b;
+      background: #fee2e2;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .auth-message a {
+      color: #1d4ed8;
+      font-weight: 900;
+    }
+
+    .admin-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .logout-btn {
+      background: #111827;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -628,6 +878,10 @@ import Toast from "../components/shared/Toast.astro";
     }
 
     @media (max-width: 980px) {
+      .admin-topline {
+        flex-direction: column;
+      }
+
       .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
       }

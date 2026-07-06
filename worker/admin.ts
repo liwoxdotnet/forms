@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { handleAuthRoutes } from "./auth";
+import { handleAdminRoutes } from "./admin";
 import { handleApiRoutes } from "./api";
 import { corsHeaders, json } from "./utils";
 
@@ -25,6 +26,9 @@ export default {
     try {
       const authResponse = await handleAuthRoutes(request, env);
       if (authResponse) return authResponse;
+
+      const adminResponse = await handleAdminRoutes(request, env);
+      if (adminResponse) return adminResponse;
 
       const apiResponse = await handleApiRoutes(request, env);
       if (apiResponse) return apiResponse;
