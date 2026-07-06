@@ -1,0 +1,392 @@
+---
+import AdminLayout from "../../components/layouts/AdminLayout.astro";
+import PageHeader from "../../components/admin/PageHeader.astro";
+import DashboardSection from "../../components/admin/DashboardSection.astro";
+import Toast from "../../components/shared/Toast.astro";
+---
+
+<AdminLayout title="Leads | Liwox Forms Admin" active="leads">
+  <Toast />
+
+  <PageHeader
+    title="Leads"
+    description="View, search, filter and export all leads captured from Liwox landing pages."
+  />
+
+  <div class="toolbar">
+    <div class="search-box">
+      <span>⌕</span>
+      <input id="searchInput" type="search" placeholder="Search by name, email, phone, campaign..." />
+    </div>
+
+    <select id="statusFilter">
+      <option value="all">All statuses</option>
+      <option value="new">New</option>
+      <option value="contacted">Contacted</option>
+      <option value="qualified">Qualified</option>
+      <option value="archived">Archived</option>
+    </select>
+
+    <button id="refreshBtn" type="button">Refresh</button>
+    <button id="exportBtn" type="button" class="secondary">Export CSV</button>
+  </div>
+
+  <DashboardSection title="All Leads" description="Latest 500 leads captured across all campaigns.">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Campaign</th>
+            <th>Page</th>
+            <th>Form</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+
+        <tbody id="leadsTable">
+          <tr>
+            <td colspan="10" class="empty">Loading leads...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </DashboardSection>
+
+  <script>
+    const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+    const ADMIN_TOKEN_KEY = "liwox_admin_token";
+
+    const state = {
+      token: localStorage.getItem(ADMIN_TOKEN_KEY) || "",
+      leads: [],
+      filteredLeads: []
+    };
+
+    const leadsTable = document.getElementById("leadsTable");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+
+    function toast(message, type = "success") {
+      if (window.LiwoxToast) {
+        window.LiwoxToast(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
+
+    function statusBadge(status) {
+      const value = status || "new";
+      const normalized = String(value).toLowerCase();
+
+      return `<span class="status-badge status-${escapeHtml(normalized)}">${escapeHtml(value)}</span>`;
+    }
+
+    function getAuthHeaders() {
+      return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${state.token}`
+      };
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "API request failed");
+      }
+
+      return data;
+    }
+
+    function redirectIfNoToken() {
+      if (!state.token) {
+        window.location.href = "/admin";
+      }
+    }
+
+    function applyFilters() {
+      const query = String(searchInput.value || "").toLowerCase().trim();
+      const status = statusFilter.value;
+
+      state.filteredLeads = state.leads.filter((lead) => {
+        const haystack = [
+          lead.full_name,
+          lead.email,
+          lead.phone,
+          lead.campaign_name,
+          lead.page_title,
+          lead.form_name,
+          lead.source,
+          lead.status
+        ].join(" ").toLowerCase();
+
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesStatus = status === "all" || lead.status === status;
+
+        return matchesQuery && matchesStatus;
+      });
+
+      renderLeads();
+    }
+
+    function renderLeads() {
+      if (!state.filteredLeads.length) {
+        leadsTable.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty">No leads found</td>
+          </tr>
+        `;
+        return;
+      }
+
+      leadsTable.innerHTML = state.filteredLeads.map((lead) => `
+        <tr>
+          <td>${escapeHtml(lead.id)}</td>
+          <td><strong>${escapeHtml(lead.full_name)}</strong></td>
+          <td>${escapeHtml(lead.email)}</td>
+          <td>${escapeHtml(lead.phone)}</td>
+          <td>${lead.campaign_name ? escapeHtml(lead.campaign_name) : "—"}</td>
+          <td>${lead.page_title ? escapeHtml(lead.page_title) : "—"}</td>
+          <td>${lead.form_name ? escapeHtml(lead.form_name) : "—"}</td>
+          <td>${escapeHtml(lead.source)}</td>
+          <td>${statusBadge(lead.status)}</td>
+          <td>${escapeHtml(formatDate(lead.created_at))}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadLeads() {
+      redirectIfNoToken();
+
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Loading...";
+
+      try {
+        const data = await fetchJson(`${API_BASE}/api/admin/leads`);
+
+        state.leads = data.leads || [];
+        state.filteredLeads = state.leads;
+
+        applyFilters();
+      } catch (error) {
+        toast(error.message || "Unable to load leads", "error");
+
+        if (String(error.message || "").toLowerCase().includes("unauthorized")) {
+          localStorage.removeItem(ADMIN_TOKEN_KEY);
+          window.location.href = "/admin";
+          return;
+        }
+
+        leadsTable.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty">Error loading leads</td>
+          </tr>
+        `;
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    function exportCsv() {
+      if (!state.filteredLeads.length) {
+        toast("No leads to export.", "warning");
+        return;
+      }
+
+      const headers = [
+        "id",
+        "full_name",
+        "email",
+        "phone",
+        "campaign_name",
+        "page_title",
+        "form_name",
+        "source",
+        "status",
+        "created_at"
+      ];
+
+      const rows = state.filteredLeads.map((lead) =>
+        headers.map((header) => {
+          const value = String(lead[header] ?? "").replaceAll('"', '""');
+          return `"${value}"`;
+        }).join(",")
+      );
+
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `liwox-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }
+
+    refreshBtn.addEventListener("click", loadLeads);
+    exportBtn.addEventListener("click", exportCsv);
+    searchInput.addEventListener("input", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
+
+    loadLeads();
+  </script>
+
+  <style>
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      min-height: 46px;
+    }
+
+    .search-box span {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      font: inherit;
+      background: transparent;
+    }
+
+    .toolbar select,
+    .toolbar button {
+      min-height: 44px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toolbar select {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .toolbar button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: .92rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 900;
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .status-new {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-contacted {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .status-qualified {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-archived {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</AdminLayout>
