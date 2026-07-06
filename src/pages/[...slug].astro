@@ -9,15 +9,10 @@ const slugParam = Astro.params.slug;
 const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam || "default";
 
 if (slug.startsWith("api/")) {
-  return new Response(JSON.stringify({
-    success: false,
-    error: "API route not found"
-  }), {
-    status: 404,
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+  const worker = await import("../../worker/index");
+  const env = Astro.locals.runtime.env;
+
+  return worker.default.fetch(Astro.request, env);
 }
 
 const API_BASE = "";
