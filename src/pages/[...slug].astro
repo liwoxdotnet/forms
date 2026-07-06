@@ -8,7 +8,7 @@ import LeadForm from "../components/forms/LeadForm.astro";
 const slugParam = Astro.params.slug;
 const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam || "default";
 
-const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+const API_BASE = "";
 
 let pageConfig = {
   slug,
