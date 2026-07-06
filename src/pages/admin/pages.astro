@@ -1,0 +1,435 @@
+---
+import AdminLayout from "../../components/layouts/AdminLayout.astro";
+import PageHeader from "../../components/admin/PageHeader.astro";
+import DashboardSection from "../../components/admin/DashboardSection.astro";
+import Toast from "../../components/shared/Toast.astro";
+---
+
+<AdminLayout title="Landing Pages | Liwox Forms Admin" active="pages">
+  <Toast />
+
+  <PageHeader
+    title="Landing Pages"
+    description="Create, view and track landing page records connected to Liwox campaigns."
+  />
+
+  <div class="grid">
+    <DashboardSection title="Create Landing Page" description="Add a landing page record for a campaign.">
+      <form id="pageForm" class="form-grid">
+        <input class="field" name="title" placeholder="Page Title" required />
+        <input class="field" name="slug" placeholder="page-slug" required />
+        <input class="field" name="campaign_key" placeholder="campaign-key" required />
+        <select class="field" name="status">
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+        <button type="submit">Create Page</button>
+      </form>
+    </DashboardSection>
+
+    <DashboardSection title="Pages" description="All landing pages currently stored in Liwox Forms.">
+      <div class="toolbar">
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Search pages..." />
+        </div>
+
+        <select id="statusFilter">
+          <option value="all">All statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+
+        <button id="refreshBtn" type="button">Refresh</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Slug</th>
+              <th>Campaign</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Leads</th>
+              <th>Created</th>
+              <th>Open</th>
+            </tr>
+          </thead>
+
+          <tbody id="pagesTable">
+            <tr>
+              <td colspan="9" class="empty">Loading pages...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DashboardSection>
+  </div>
+
+  <script>
+    const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+    const ADMIN_TOKEN_KEY = "liwox_admin_token";
+
+    const state = {
+      token: localStorage.getItem(ADMIN_TOKEN_KEY) || "",
+      pages: [],
+      filteredPages: []
+    };
+
+    const pageForm = document.getElementById("pageForm");
+    const pagesTable = document.getElementById("pagesTable");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+
+    function redirectIfNoToken() {
+      if (!state.token) {
+        window.location.href = "/admin";
+      }
+    }
+
+    function toast(message, type = "success") {
+      if (window.LiwoxToast) {
+        window.LiwoxToast(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
+
+    function statusBadge(status) {
+      const value = status || "published";
+      const normalized = String(value).toLowerCase();
+
+      return `<span class="status-badge status-${escapeHtml(normalized)}">${escapeHtml(value)}</span>`;
+    }
+
+    function getAuthHeaders() {
+      return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${state.token}`
+      };
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${state.token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "API request failed");
+      }
+
+      return data;
+    }
+
+    function applyFilters() {
+      const query = String(searchInput.value || "").toLowerCase().trim();
+      const status = statusFilter.value;
+
+      state.filteredPages = state.pages.filter((page) => {
+        const haystack = [
+          page.title,
+          page.slug,
+          page.page_key,
+          page.campaign_key,
+          page.campaign_name,
+          page.page_type,
+          page.status
+        ].join(" ").toLowerCase();
+
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesStatus = status === "all" || page.status === status;
+
+        return matchesQuery && matchesStatus;
+      });
+
+      renderPages();
+    }
+
+    function renderPages() {
+      if (!state.filteredPages.length) {
+        pagesTable.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty">No pages found</td>
+          </tr>
+        `;
+        return;
+      }
+
+      pagesTable.innerHTML = state.filteredPages.map((page) => {
+        const slug = page.slug || page.page_key || "";
+
+        return `
+          <tr>
+            <td>${escapeHtml(page.id)}</td>
+            <td><strong>${escapeHtml(page.title)}</strong></td>
+            <td>${escapeHtml(slug)}</td>
+            <td>${escapeHtml(page.campaign_name || page.campaign_key || "—")}</td>
+            <td>${escapeHtml(page.page_type || "landing_page")}</td>
+            <td>${statusBadge(page.status)}</td>
+            <td>${escapeHtml(page.lead_count ?? 0)}</td>
+            <td>${escapeHtml(formatDate(page.created_at))}</td>
+            <td>
+              ${slug ? `<a class="open-link" href="/${escapeHtml(slug)}" target="_blank">Open</a>` : "—"}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function loadPages() {
+      redirectIfNoToken();
+
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Loading...";
+
+      try {
+        const data = await fetchJson(`${API_BASE}/api/admin/pages`);
+
+        state.pages = data.pages || [];
+        state.filteredPages = state.pages;
+
+        applyFilters();
+      } catch (error) {
+        toast(error.message || "Unable to load pages", "error");
+
+        if (String(error.message || "").toLowerCase().includes("unauthorized")) {
+          localStorage.removeItem(ADMIN_TOKEN_KEY);
+          window.location.href = "/admin";
+          return;
+        }
+
+        pagesTable.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty">Error loading pages</td>
+          </tr>
+        `;
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    pageForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      redirectIfNoToken();
+
+      const formData = new FormData(pageForm);
+      const slug = String(formData.get("slug") || "").trim();
+
+      const payload = {
+        title: formData.get("title"),
+        slug,
+        page_key: slug,
+        campaign_key: formData.get("campaign_key"),
+        page_type: "landing_page",
+        status: formData.get("status") || "published"
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/api/pages`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Unable to create page");
+        }
+
+        pageForm.reset();
+        toast("Landing page created successfully.");
+        await loadPages();
+      } catch (error) {
+        toast(error.message || "Unable to create page", "error");
+      }
+    });
+
+    refreshBtn.addEventListener("click", loadPages);
+    searchInput.addEventListener("input", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
+
+    loadPages();
+  </script>
+
+  <style>
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      max-width: 560px;
+    }
+
+    .field {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font: inherit;
+      background: #fff;
+    }
+
+    .form-grid button,
+    .toolbar button {
+      min-height: 44px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      min-height: 46px;
+    }
+
+    .search-box span {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      font: inherit;
+      background: transparent;
+    }
+
+    .toolbar select {
+      min-height: 44px;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      cursor: pointer;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: .92rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+    }
+
+    .open-link {
+      color: var(--blue);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .open-link:hover {
+      text-decoration: underline;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 900;
+      background: #f3f4f6;
+      color: #374151;
+      text-transform: capitalize;
+    }
+
+    .status-published {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-draft {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-archived {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</AdminLayout>
