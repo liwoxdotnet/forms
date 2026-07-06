@@ -1,0 +1,351 @@
+---
+import AdminLayout from "../../components/layouts/AdminLayout.astro";
+import PageHeader from "../../components/admin/PageHeader.astro";
+import DashboardSection from "../../components/admin/DashboardSection.astro";
+import Toast from "../../components/shared/Toast.astro";
+---
+
+<AdminLayout title="Campaigns | Liwox Forms Admin" active="campaigns">
+  <Toast />
+
+  <PageHeader
+    title="Campaigns"
+    description="Create, view and track campaigns connected to Liwox landing pages."
+  />
+
+  <div class="grid">
+    <DashboardSection title="Create Campaign" description="Add a new campaign for tracking leads.">
+      <form id="campaignForm" class="form-grid">
+        <input class="field" name="name" placeholder="Campaign Name" required />
+        <input class="field" name="campaign_key" placeholder="campaign-key" required />
+        <textarea class="field" name="description" placeholder="Description"></textarea>
+        <button type="submit">Create Campaign</button>
+      </form>
+    </DashboardSection>
+
+    <DashboardSection title="Campaigns" description="All campaigns currently stored in Liwox Forms.">
+      <div class="toolbar">
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Search campaigns..." />
+        </div>
+
+        <button id="refreshBtn" type="button">Refresh</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Key</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Leads</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+
+          <tbody id="campaignsTable">
+            <tr>
+              <td colspan="7" class="empty">Loading campaigns...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DashboardSection>
+  </div>
+
+  <script>
+    const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+    const ADMIN_TOKEN_KEY = "liwox_admin_token";
+
+    const state = {
+      token: localStorage.getItem(ADMIN_TOKEN_KEY) || "",
+      campaigns: [],
+      filteredCampaigns: []
+    };
+
+    const campaignForm = document.getElementById("campaignForm");
+    const campaignsTable = document.getElementById("campaignsTable");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const searchInput = document.getElementById("searchInput");
+
+    function redirectIfNoToken() {
+      if (!state.token) {
+        window.location.href = "/admin";
+      }
+    }
+
+    function toast(message, type = "success") {
+      if (window.LiwoxToast) {
+        window.LiwoxToast(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
+
+    function getAuthHeaders() {
+      return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${state.token}`
+      };
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${state.token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "API request failed");
+      }
+
+      return data;
+    }
+
+    function renderCampaigns() {
+      if (!state.filteredCampaigns.length) {
+        campaignsTable.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">No campaigns found</td>
+          </tr>
+        `;
+        return;
+      }
+
+      campaignsTable.innerHTML = state.filteredCampaigns.map((campaign) => `
+        <tr>
+          <td>${escapeHtml(campaign.id)}</td>
+          <td><strong>${escapeHtml(campaign.name)}</strong></td>
+          <td>${escapeHtml(campaign.campaign_key)}</td>
+          <td>${escapeHtml(campaign.description || "—")}</td>
+          <td>${escapeHtml(campaign.status || "active")}</td>
+          <td>${escapeHtml(campaign.lead_count ?? 0)}</td>
+          <td>${escapeHtml(formatDate(campaign.created_at))}</td>
+        </tr>
+      `).join("");
+    }
+
+    function applyFilters() {
+      const query = String(searchInput.value || "").toLowerCase().trim();
+
+      state.filteredCampaigns = state.campaigns.filter((campaign) => {
+        const haystack = [
+          campaign.name,
+          campaign.campaign_key,
+          campaign.description,
+          campaign.status
+        ].join(" ").toLowerCase();
+
+        return !query || haystack.includes(query);
+      });
+
+      renderCampaigns();
+    }
+
+    async function loadCampaigns() {
+      redirectIfNoToken();
+
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Loading...";
+
+      try {
+        const data = await fetchJson(`${API_BASE}/api/admin/campaigns`);
+
+        state.campaigns = data.campaigns || [];
+        state.filteredCampaigns = state.campaigns;
+
+        applyFilters();
+      } catch (error) {
+        toast(error.message || "Unable to load campaigns", "error");
+
+        if (String(error.message || "").toLowerCase().includes("unauthorized")) {
+          localStorage.removeItem(ADMIN_TOKEN_KEY);
+          window.location.href = "/admin";
+          return;
+        }
+
+        campaignsTable.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">Error loading campaigns</td>
+          </tr>
+        `;
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    campaignForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      redirectIfNoToken();
+
+      const formData = new FormData(campaignForm);
+
+      const payload = {
+        name: formData.get("name"),
+        campaign_key: formData.get("campaign_key"),
+        description: formData.get("description"),
+        status: "active"
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/api/campaigns`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Unable to create campaign");
+        }
+
+        campaignForm.reset();
+        toast("Campaign created successfully.");
+        await loadCampaigns();
+      } catch (error) {
+        toast(error.message || "Unable to create campaign", "error");
+      }
+    });
+
+    refreshBtn.addEventListener("click", loadCampaigns);
+    searchInput.addEventListener("input", applyFilters);
+
+    loadCampaigns();
+  </script>
+
+  <style>
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      max-width: 560px;
+    }
+
+    .field {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font: inherit;
+      background: #fff;
+    }
+
+    textarea.field {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .form-grid button,
+    .toolbar button {
+      min-height: 44px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      min-height: 46px;
+    }
+
+    .search-box span {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      font: inherit;
+      background: transparent;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: .92rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+    }
+  </style>
+</AdminLayout>
