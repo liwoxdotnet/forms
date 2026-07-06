@@ -8,6 +8,18 @@ import LeadForm from "../components/forms/LeadForm.astro";
 const slugParam = Astro.params.slug;
 const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam || "default";
 
+if (slug.startsWith("api/")) {
+  return new Response(JSON.stringify({
+    success: false,
+    error: "API route not found"
+  }), {
+    status: 404,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+}
+
 const API_BASE = "";
 
 let pageConfig = {
