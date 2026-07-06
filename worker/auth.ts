@@ -4,8 +4,8 @@ import type { Env } from "./index";
 import { addMinutes, json, randomToken, readJson, text } from "./utils";
 import { sendAdminLoginEmail } from "./mail";
 
-const DEFAULT_ADMIN_FRONTEND_URL = "https://forms.liwox.net";
 const ADMIN_SESSION_COOKIE = "liwox_admin_session";
+const DEFAULT_ADMIN_BASE_URL = "https://forms.liwox.net";
 
 function getCookie(request: Request, name: string) {
   const cookieHeader = request.headers.get("Cookie") || "";
@@ -26,22 +26,15 @@ function getBearerToken(request: Request) {
 }
 
 export function getAdminTokenFromRequest(request: Request) {
-  return (
-    getBearerToken(request) ||
-    getCookie(request, ADMIN_SESSION_COOKIE)
-  );
+  return getBearerToken(request) || getCookie(request, ADMIN_SESSION_COOKIE);
 }
 
 export async function validateAdminSession(request: Request, env: Env) {
   const token = getAdminTokenFromRequest(request);
-
-  if (!token) {
-    return null;
-  }
+  if (!token) return null;
 
   const session = await env.DB.prepare(`
     SELECT
-      admin_tokens.id,
       admin_tokens.email,
       admin_tokens.token,
       admin_tokens.expires_at,
@@ -54,12 +47,8 @@ export async function validateAdminSession(request: Request, env: Env) {
   `).bind(token).first<any>();
 
   if (!session) return null;
-
   if (!session.used_at) return null;
-
-  if (new Date(session.expires_at) < new Date()) {
-    return null;
-  }
+  if (new Date(session.expires_at) < new Date()) return null;
 
   return {
     email: session.email,
@@ -76,7 +65,8 @@ export async function requireAdmin(request: Request, env: Env) {
         success: false,
         error: "Unauthorized"
       },
-      401
+      401,
+      request
     );
   }
 
@@ -89,10 +79,7 @@ export async function handleAuthRoutes(
 ): Promise<Response | null> {
   const url = new URL(request.url);
 
-  if (
-    request.method === "POST" &&
-    url.pathname === "/api/admin/send-login-link"
-  ) {
+  if (request.method === "POST" && url.pathname === "/api/admin/send-login-link") {
     const body = await readJson(request);
     const email = text(body.email)?.toLowerCase();
 
@@ -102,7 +89,8 @@ export async function handleAuthRoutes(
           success: false,
           error: "Email is required"
         },
-        400
+        400,
+        request
       );
     }
 
@@ -119,7 +107,8 @@ export async function handleAuthRoutes(
           success: false,
           error: "This email is not allowed to access Liwox Forms admin."
         },
-        403
+        403,
+        request
       );
     }
 
@@ -134,39 +123,33 @@ export async function handleAuthRoutes(
       ) VALUES (?, ?, ?)
     `).bind(email, token, expiresAt).run();
 
-    const frontendBase =
-      env.ADMIN_BASE_URL || DEFAULT_ADMIN_FRONTEND_URL;
-
-    const apiBase = `${url.protocol}//${url.host}`;
+    const frontendBase = env.ADMIN_BASE_URL || DEFAULT_ADMIN_BASE_URL;
 
     const verifyUrl =
-      `${apiBase}/api/admin/verify?token=${encodeURIComponent(token)}`;
+      `${url.origin}/api/admin/verify?token=${encodeURIComponent(token)}`;
 
-    const finalLoginUrl =
+    const fallbackAdminUrl =
       `${frontendBase}/admin?admin_token=${encodeURIComponent(token)}`;
 
-    const mailResult = await sendAdminLoginEmail(
-      env,
-      email,
-      verifyUrl
-    );
+    const mailResult = await sendAdminLoginEmail(env, email, verifyUrl);
 
-    return json({
-      success: true,
-      message: mailResult.sent
-        ? "Login link sent successfully."
-        : "Login link generated. Email sending is not configured yet.",
-      expires_at: expiresAt,
-      login_url: mailResult.sent ? undefined : verifyUrl,
-      admin_url: mailResult.sent ? undefined : finalLoginUrl,
-      email_sent: mailResult.sent
-    });
+    return json(
+      {
+        success: true,
+        message: mailResult.sent
+          ? "Login link sent successfully."
+          : "Login link generated. Email sending is not configured yet.",
+        email_sent: mailResult.sent,
+        expires_at: expiresAt,
+        login_url: mailResult.sent ? undefined : verifyUrl,
+        admin_url: mailResult.sent ? undefined : fallbackAdminUrl
+      },
+      200,
+      request
+    );
   }
 
-  if (
-    request.method === "GET" &&
-    url.pathname === "/api/admin/verify"
-  ) {
+  if (request.method === "GET" && url.pathname === "/api/admin/verify") {
     const token = text(url.searchParams.get("token"));
 
     if (!token) {
@@ -175,13 +158,13 @@ export async function handleAuthRoutes(
           success: false,
           error: "Token is required"
         },
-        400
+        400,
+        request
       );
     }
 
     const record = await env.DB.prepare(`
       SELECT
-        admin_tokens.id,
         admin_tokens.email,
         admin_tokens.token,
         admin_tokens.expires_at,
@@ -199,7 +182,8 @@ export async function handleAuthRoutes(
           success: false,
           error: "Invalid login token"
         },
-        400
+        400,
+        request
       );
     }
 
@@ -209,7 +193,8 @@ export async function handleAuthRoutes(
           success: false,
           error: "This login link has already been used"
         },
-        400
+        400,
+        request
       );
     }
 
@@ -219,7 +204,8 @@ export async function handleAuthRoutes(
           success: false,
           error: "This login link has expired"
         },
-        400
+        400,
+        request
       );
     }
 
@@ -233,9 +219,7 @@ export async function handleAuthRoutes(
       WHERE token = ?
     `).bind(sessionExpiresAt, token).run();
 
-    const frontendBase =
-      env.ADMIN_BASE_URL || DEFAULT_ADMIN_FRONTEND_URL;
-
+    const frontendBase = env.ADMIN_BASE_URL || DEFAULT_ADMIN_BASE_URL;
     const redirectUrl =
       `${frontendBase}/admin?admin_token=${encodeURIComponent(token)}`;
 
@@ -248,10 +232,7 @@ export async function handleAuthRoutes(
     });
   }
 
-  if (
-    request.method === "GET" &&
-    url.pathname === "/api/admin/session"
-  ) {
+  if (request.method === "GET" && url.pathname === "/api/admin/session") {
     const admin = await validateAdminSession(request, env);
 
     if (!admin) {
@@ -260,23 +241,25 @@ export async function handleAuthRoutes(
           success: false,
           authenticated: false
         },
-        401
+        401,
+        request
       );
     }
 
-    return json({
-      success: true,
-      authenticated: true,
-      admin: {
-        email: admin.email
-      }
-    });
+    return json(
+      {
+        success: true,
+        authenticated: true,
+        admin: {
+          email: admin.email
+        }
+      },
+      200,
+      request
+    );
   }
 
-  if (
-    request.method === "POST" &&
-    url.pathname === "/api/admin/logout"
-  ) {
+  if (request.method === "POST" && url.pathname === "/api/admin/logout") {
     const token = getAdminTokenFromRequest(request);
 
     if (token) {
@@ -292,7 +275,8 @@ export async function handleAuthRoutes(
         success: true,
         message: "Logged out successfully"
       },
-      200
+      200,
+      request
     );
   }
 
