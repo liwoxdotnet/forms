@@ -1,0 +1,307 @@
+---
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm Your Email | Liwox Forms</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #ffffff;
+      color: #07111f;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 28px 24px 36px;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+    }
+
+    .back {
+      font-size: 2.4rem;
+      text-decoration: none;
+      color: #07111f;
+      line-height: 1;
+    }
+
+    .logo {
+      text-align: center;
+      color: #f31635;
+      font-size: clamp(2.4rem, 9vw, 4rem);
+      font-weight: 1000;
+      letter-spacing: -0.08em;
+    }
+
+    .content {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 52px 0;
+    }
+
+    .icon {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 34px;
+      position: relative;
+    }
+
+    .circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      position: absolute;
+      left: 10px;
+      top: 24px;
+      display: grid;
+      place-items: center;
+      font-size: 4rem;
+    }
+
+    .check {
+      width: 58px;
+      height: 58px;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 2.2rem;
+      font-weight: 1000;
+      position: absolute;
+      right: 8px;
+      top: 10px;
+      border: 6px solid #fff;
+    }
+
+    h1 {
+      margin: 0 0 26px;
+      font-size: clamp(2.3rem, 8vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+      font-weight: 1000;
+    }
+
+    p {
+      margin: 0;
+      font-size: clamp(1.15rem, 4.5vw, 1.7rem);
+      line-height: 1.45;
+      color: #4b5563;
+    }
+
+    strong {
+      color: #07111f;
+      font-weight: 1000;
+    }
+
+    .actions {
+      display: grid;
+      gap: 14px;
+      width: min(650px, 100%);
+      margin: 46px auto 0;
+    }
+
+    .primary {
+      min-height: 72px;
+      border: 0;
+      border-radius: 999px;
+      background: #f31635;
+      color: #fff;
+      font-size: clamp(1.05rem, 4vw, 1.35rem);
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      text-decoration: none;
+      display: grid;
+      place-items: center;
+      padding: 0 24px;
+    }
+
+    .secondary {
+      color: #f31635;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .download-box {
+      margin-top: 34px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      display: none;
+    }
+
+    .download-box.show {
+      display: block;
+    }
+
+    .download-box p {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.95rem;
+      padding-top: 24px;
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        padding: 24px 18px 28px;
+      }
+
+      .content {
+        padding: 42px 0;
+      }
+
+      .primary {
+        min-height: 66px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="top">
+      <a class="back" href="/chord-hacks" aria-label="Go back">‹</a>
+      <div class="logo">liwox</div>
+      <div></div>
+    </header>
+
+    <section class="content">
+      <div>
+        <div class="icon" aria-hidden="true">
+          <div class="circle">✉️</div>
+          <div class="check">✓</div>
+        </div>
+
+        <h1>You're almost there!</h1>
+
+        <p>
+          We've received your request and sent the link to
+          <strong id="emailText">your email</strong>.
+        </p>
+
+        <p style="margin-top: 22px;">
+          Didn't get it? Please check your spam folder or resend the email link to try again.
+        </p>
+
+        <div class="download-box" id="downloadBox">
+          <p>
+            For testing, you can also use the button below. Replace this link later with your real PDF or lead magnet.
+          </p>
+
+          <a
+            class="primary"
+            href="/downloads/chord-hacks-guide.pdf"
+            download
+          >
+            Download Guide
+          </a>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="resendBtn" type="button">
+            Resend Email
+          </button>
+
+          <a class="secondary" href="/chord-hacks">
+            Back to landing page
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      Liwox Forms · Secure lead capture system
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "https://liwox-forms-api.liwox-net.workers.dev";
+
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email") || "";
+    const emailText = document.getElementById("emailText");
+    const resendBtn = document.getElementById("resendBtn");
+    const downloadBox = document.getElementById("downloadBox");
+
+    if (email) {
+      emailText.textContent = email;
+    }
+
+    /*
+      Set this to true if you want to show a direct download button
+      on the thank-you page while email delivery is still being built.
+    */
+    const SHOW_TEST_DOWNLOAD = true;
+
+    if (SHOW_TEST_DOWNLOAD) {
+      downloadBox.classList.add("show");
+    }
+
+    resendBtn.addEventListener("click", async () => {
+      if (!email) {
+        alert("No email address found. Please go back and submit the form again.");
+        return;
+      }
+
+      resendBtn.disabled = true;
+      resendBtn.textContent = "Sending...";
+
+      try {
+        const response = await fetch(`${API_BASE}/api/leads`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email,
+            full_name: "",
+            phone: "",
+            company: "",
+            message: "Resent Chord Hacks confirmation email",
+            source: "confirm_resend",
+            campaign_key: "chord-hacks",
+            page_key: "chord-hacks-confirm",
+            form_key: "chord-hacks-resend"
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Unable to resend email");
+        }
+
+        alert("Email request resent successfully. Please check your inbox.");
+      } catch (error) {
+        alert(error.message || "Unable to resend email");
+      } finally {
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Resend Email";
+      }
+    });
+  </script>
+</body>
+</html>
