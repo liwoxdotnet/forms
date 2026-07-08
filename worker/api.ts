@@ -2,6 +2,7 @@
 
 import type { Env } from "./index";
 import { json, readJson, text } from "./utils";
+import { sendLeadMagnetEmail } from "./mail";
 
 type JsonValue =
   | string
@@ -145,6 +146,143 @@ export async function handleApiRoutes(
     });
   }
 
+  if (request.method === "POST" && url.pathname === "/api/deliver-lead-magnet") {
+    const body = await readJson(request);
+    const meta = getClientMeta(request);
+
+    const email = text(body.email);
+    const fullName = text(body.full_name);
+    const phone = text(body.phone);
+    const campaignKey = text(body.campaign_key) || "lead-magnet";
+    const pageKey = text(body.page_key);
+    const formKey = text(body.form_key);
+    const source = text(body.source) || "lead_magnet";
+    const title = text(body.title) || "Your Download";
+    const description = text(body.description);
+    const downloadUrl = text(body.download_url);
+
+    if (!email) {
+      return json({ success: false, error: "Email is required" }, 400);
+    }
+
+    if (!downloadUrl) {
+      return json({ success: false, error: "download_url is required" }, 400);
+    }
+
+    let campaign = await getCampaignByKey(env, campaignKey);
+    if (!campaign && campaignKey) campaign = await ensureCampaign(env, campaignKey);
+
+    const page = pageKey ? await getPageByKey(env, pageKey) : null;
+    const form = formKey ? await getFormByKey(env, formKey) : null;
+
+    const leadResult = await env.DB.prepare(`
+      INSERT INTO leads (
+        campaign_id,
+        page_id,
+        form_id,
+        full_name,
+        email,
+        phone,
+        company,
+        message,
+        source,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        utm_term,
+        utm_content,
+        referrer,
+        user_agent,
+        ip_address,
+        status,
+        raw_payload
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+      .bind(
+        campaign?.id || null,
+        page?.id || null,
+        form?.id || null,
+        fullName,
+        email,
+        phone,
+        text(body.company),
+        `Requested lead magnet: ${title}`,
+        source,
+        text(body.utm_source),
+        text(body.utm_medium),
+        text(body.utm_campaign),
+        text(body.utm_term),
+        text(body.utm_content),
+        text(body.referrer) || meta.referrer,
+        meta.user_agent,
+        meta.ip_address,
+        "new",
+        JSON.stringify(body)
+      )
+      .run();
+
+    const leadId = Number(leadResult.meta.last_row_id);
+
+    await env.DB.prepare(`
+      INSERT INTO submissions (
+        campaign_id,
+        page_id,
+        form_id,
+        lead_id,
+        submission_type,
+        status,
+        raw_payload
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `)
+      .bind(
+        campaign?.id || null,
+        page?.id || null,
+        form?.id || null,
+        leadId,
+        "lead_magnet",
+        "received",
+        JSON.stringify(body)
+      )
+      .run();
+
+    await createEvent(env, leadId, "lead_magnet_requested", {
+      campaign_key: campaignKey,
+      page_key: pageKey,
+      form_key: formKey,
+      source,
+      email,
+      title,
+      download_url: downloadUrl
+    });
+
+    const emailResult = await sendLeadMagnetEmail(env, email, {
+      title,
+      description: description || undefined,
+      downloadUrl
+    });
+
+    await createEvent(env, leadId, "lead_magnet_email_delivery", {
+      sent: emailResult.sent,
+      title,
+      download_url: downloadUrl,
+      reason: emailResult.sent ? null : emailResult.reason
+    });
+
+    return json(
+      {
+        success: true,
+        message: emailResult.sent
+          ? "Lead captured and download email sent successfully."
+          : "Lead captured. Email delivery is not configured or failed.",
+        lead_id: leadId,
+        email_sent: emailResult.sent,
+        download_url: emailResult.sent ? undefined : downloadUrl,
+        email_error: emailResult.sent ? undefined : emailResult.reason
+      },
+      201
+    );
+  }
+
   if (request.method === "GET" && url.pathname === "/api/campaigns") {
     const campaigns = await env.DB.prepare(`
       SELECT
@@ -161,10 +299,7 @@ export async function handleApiRoutes(
       ORDER BY campaigns.created_at DESC
     `).all();
 
-    return json({
-      success: true,
-      campaigns: campaigns.results
-    });
+    return json({ success: true, campaigns: campaigns.results });
   }
 
   if (request.method === "POST" && url.pathname === "/api/campaigns") {
@@ -176,26 +311,11 @@ export async function handleApiRoutes(
     const status = text(body.status) || "active";
 
     if (!campaignKey || !name) {
-      return json(
-        {
-          success: false,
-          error: "campaign_key and name are required"
-        },
-        400
-      );
+      return json({ success: false, error: "campaign_key and name are required" }, 400);
     }
 
     const existing = await getCampaignByKey(env, campaignKey);
-
-    if (existing) {
-      return json(
-        {
-          success: false,
-          error: "Campaign already exists"
-        },
-        409
-      );
-    }
+    if (existing) return json({ success: false, error: "Campaign already exists" }, 409);
 
     const result = await env.DB.prepare(`
       INSERT INTO campaigns (
@@ -266,10 +386,7 @@ export async function handleApiRoutes(
       .bind(...values)
       .all();
 
-    return json({
-      success: true,
-      pages: pages.results
-    });
+    return json({ success: true, pages: pages.results });
   }
 
   if (request.method === "POST" && url.pathname === "/api/pages") {
@@ -283,25 +400,12 @@ export async function handleApiRoutes(
     const status = text(body.status) || "published";
 
     if (!pageKey || !slug || !title) {
-      return json(
-        {
-          success: false,
-          error: "page_key, slug, and title are required"
-        },
-        400
-      );
+      return json({ success: false, error: "page_key, slug, and title are required" }, 400);
     }
 
     const existingPage = await getPageBySlug(env, slug);
-
     if (existingPage) {
-      return json(
-        {
-          success: false,
-          error: "A page with this slug or page_key already exists"
-        },
-        409
-      );
+      return json({ success: false, error: "A page with this slug or page_key already exists" }, 409);
     }
 
     const campaign = campaignKey ? await ensureCampaign(env, campaignKey) : null;
@@ -316,14 +420,7 @@ export async function handleApiRoutes(
         status
       ) VALUES (?, ?, ?, ?, ?, ?)
     `)
-      .bind(
-        campaign?.id || null,
-        pageKey,
-        slug,
-        title,
-        pageType,
-        status
-      )
+      .bind(campaign?.id || null, pageKey, slug, title, pageType, status)
       .run();
 
     return json(
@@ -350,15 +447,7 @@ export async function handleApiRoutes(
     const slug = decodeURIComponent(pageMatch[1]);
     const page = await getPageBySlug(env, slug);
 
-    if (!page) {
-      return json(
-        {
-          success: false,
-          error: "Page not found"
-        },
-        404
-      );
-    }
+    if (!page) return json({ success: false, error: "Page not found" }, 404);
 
     const form = await env.DB.prepare(`
       SELECT
@@ -391,15 +480,7 @@ export async function handleApiRoutes(
     const body = await readJson(request);
     const existingPage = await getPageBySlug(env, slug);
 
-    if (!existingPage) {
-      return json(
-        {
-          success: false,
-          error: "Page not found"
-        },
-        404
-      );
-    }
+    if (!existingPage) return json({ success: false, error: "Page not found" }, 404);
 
     const campaignKey = text(body.campaign_key);
     const campaign = campaignKey ? await ensureCampaign(env, campaignKey) : null;
@@ -407,10 +488,8 @@ export async function handleApiRoutes(
     const newPageKey = text(body.page_key) || String(existingPage.page_key);
     const newSlug = text(body.slug) || String(existingPage.slug);
     const newTitle = text(body.title) || String(existingPage.title);
-    const newPageType =
-      text(body.page_type) || String(existingPage.page_type || "landing_page");
-    const newStatus =
-      text(body.status) || String(existingPage.status || "published");
+    const newPageType = text(body.page_type) || String(existingPage.page_type || "landing_page");
+    const newStatus = text(body.status) || String(existingPage.status || "published");
 
     await env.DB.prepare(`
       UPDATE pages
@@ -435,25 +514,14 @@ export async function handleApiRoutes(
       )
       .run();
 
-    return json({
-      success: true,
-      message: "Page updated successfully"
-    });
+    return json({ success: true, message: "Page updated successfully" });
   }
 
   if (pageMatch && request.method === "DELETE") {
     const slug = decodeURIComponent(pageMatch[1]);
     const existingPage = await getPageBySlug(env, slug);
 
-    if (!existingPage) {
-      return json(
-        {
-          success: false,
-          error: "Page not found"
-        },
-        404
-      );
-    }
+    if (!existingPage) return json({ success: false, error: "Page not found" }, 404);
 
     await env.DB.prepare(`
       UPDATE pages
@@ -463,10 +531,7 @@ export async function handleApiRoutes(
       .bind(existingPage.id)
       .run();
 
-    return json({
-      success: true,
-      message: "Page archived successfully"
-    });
+    return json({ success: true, message: "Page archived successfully" });
   }
 
   if (request.method === "GET" && url.pathname === "/api/forms") {
@@ -486,10 +551,7 @@ export async function handleApiRoutes(
       ORDER BY forms.created_at DESC
     `).all();
 
-    return json({
-      success: true,
-      forms: forms.results
-    });
+    return json({ success: true, forms: forms.results });
   }
 
   if (request.method === "POST" && url.pathname === "/api/forms") {
@@ -503,13 +565,7 @@ export async function handleApiRoutes(
     const status = text(body.status) || "active";
 
     if (!formKey || !name) {
-      return json(
-        {
-          success: false,
-          error: "form_key and name are required"
-        },
-        400
-      );
+      return json({ success: false, error: "form_key and name are required" }, 400);
     }
 
     const campaign = campaignKey ? await getCampaignByKey(env, campaignKey) : null;
@@ -525,14 +581,7 @@ export async function handleApiRoutes(
         status
       ) VALUES (?, ?, ?, ?, ?, ?)
     `)
-      .bind(
-        campaign?.id || null,
-        page?.id || null,
-        formKey,
-        name,
-        formType,
-        status
-      )
+      .bind(campaign?.id || null, page?.id || null, formKey, name, formType, status)
       .run();
 
     return json(
@@ -601,10 +650,7 @@ export async function handleApiRoutes(
       .bind(...values)
       .all();
 
-    return json({
-      success: true,
-      leads: leads.results
-    });
+    return json({ success: true, leads: leads.results });
   }
 
   if (request.method === "POST" && url.pathname === "/api/leads") {
@@ -623,20 +669,11 @@ export async function handleApiRoutes(
     const source = text(body.source) || "website";
 
     if (!email && !phone) {
-      return json(
-        {
-          success: false,
-          error: "Email or phone is required"
-        },
-        400
-      );
+      return json({ success: false, error: "Email or phone is required" }, 400);
     }
 
     let campaign = campaignKey ? await getCampaignByKey(env, campaignKey) : null;
-
-    if (!campaign && campaignKey) {
-      campaign = await ensureCampaign(env, campaignKey);
-    }
+    if (!campaign && campaignKey) campaign = await ensureCampaign(env, campaignKey);
 
     const page = pageKey ? await getPageByKey(env, pageKey) : null;
     const form = formKey ? await getFormByKey(env, formKey) : null;
@@ -720,14 +757,7 @@ export async function handleApiRoutes(
       phone
     });
 
-    return json(
-      {
-        success: true,
-        message: "Lead captured successfully",
-        lead_id: leadId
-      },
-      201
-    );
+    return json({ success: true, message: "Lead captured successfully", lead_id: leadId }, 201);
   }
 
   const leadMatch = url.pathname.match(/^\/api\/leads\/(\d+)$/);
@@ -753,20 +783,8 @@ export async function handleApiRoutes(
       .bind(leadId)
       .first();
 
-    if (!lead) {
-      return json(
-        {
-          success: false,
-          error: "Lead not found"
-        },
-        404
-      );
-    }
-
-    return json({
-      success: true,
-      lead
-    });
+    if (!lead) return json({ success: false, error: "Lead not found" }, 404);
+    return json({ success: true, lead });
   }
 
   if (leadMatch && request.method === "PATCH") {
@@ -774,15 +792,7 @@ export async function handleApiRoutes(
     const body = await readJson(request);
     const status = text(body.status);
 
-    if (!status) {
-      return json(
-        {
-          success: false,
-          error: "status is required"
-        },
-        400
-      );
-    }
+    if (!status) return json({ success: false, error: "status is required" }, 400);
 
     await env.DB.prepare(`
       UPDATE leads
@@ -794,10 +804,7 @@ export async function handleApiRoutes(
 
     await createEvent(env, leadId, "lead_status_updated", { status });
 
-    return json({
-      success: true,
-      message: "Lead updated successfully"
-    });
+    return json({ success: true, message: "Lead updated successfully" });
   }
 
   if (request.method === "GET" && url.pathname === "/api/dashboard") {
